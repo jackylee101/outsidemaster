@@ -21,7 +21,7 @@
     
     <!--contextName property name="LOG_HOME" value="/opt/das/logs/mosweb" /-->
     <!--<property name="LOG_HOME" value="/mnt/vdb1/logs/recmdweb" />-->
-    <property name="LOG_HOME" value="/mnt/vdb1/logs/outsideserv" />
+    <property name="LOG_HOME" value="/mnt/vdb1/logs/outsidemaster" />
     <property name="CHARSET" value="UTF-8" />
     <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n" />
     <!-- 控制台輸出 -->
