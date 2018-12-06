@@ -1,0 +1,75 @@
+#激活哪一个环境的配置文件
+#公共配置
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  application:
+    name: outsidemaster
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: "jdbc:h2:file:~/tmp/outsidemaster"
+    username: sa
+    password: sa
+    driverClassName: org.h2.Driver
+    
+server:
+  context-path: /${spring.application.name}/api
+  port: 8094
+  tomcat:
+    uri-encoding: UTF-8
+  
+info:
+  desciption: DAS web
+  component: Web Server
+
+management:
+#  port: 8081
+#  context-path: /manage
+  security:
+    enabled: false
+
+recmdapi:
+  recmdCustProdList: http://127.0.0.1:8092/recmd/api/v1/recmdCustProdList/
+  recmdCustGroupProdList: http://127.0.0.1:8092/recmd/api/v1/recmdCustGroupProdList/
+
+code:
+  errCode:
+    weatherErrorCode: ERR048
+    cityMappingErrorCode: ERR051
+    holidayErrorCode: ERR052
+  mailCode:
+    filecalendarDataCode: MAIL022
+
+weather:
+  HIGH_TEMPERATURE: HIGH_TEMPERATURE
+  LOW_TEMPERATURE: LOW_TEMPERATURE
+  WEATHER_CONDITION: WEATHER_CONDITION
+
+
+fastjson:
+# 使用默认属性首字母
+  compatibleWithJavaBean: true
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+
+baseUrl:
+  engineUrl: http://172.16.116.77:8089/?bid=
+  apiUrl: https://rds.rollingdemand.com.cn
+  dbUrl: http://127.0.0.1:8076
+  
+  syncCityList: prod
+  syncCities: 65534
+  syncEnable: false
+  syncServer: prod
+  syncUrl1: http://rds.rollingdemand.com.cn
+  syncUrl2: http://uatrds.rollingdemand.com.cn
+  syncUrl3: http://test.uatrds.rollingdemand.cn:8080
+  
+scheduledtasks:
+  trigtime: "0 30 22 * * ?"

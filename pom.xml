@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.ebizprise</groupId>
+	<version>0.1-SNAPSHOT</version>
+	<artifactId>das-outsidemaster</artifactId>
+	<packaging>jar</packaging>
+
+	<properties>
+		<!-- junit版本号 <junit.version>4.12</junit.version> -->
+		<fastjson.version>1.2.40</fastjson.version>
+		<maven-site-plugin.version>3.7</maven-site-plugin.version>
+		<spring.cloud.version>Dalston.SR1</spring.cloud.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+		<project.version>0.1-SNAPSHOT</project.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Import dependency management from Spring Boot -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>1.5.1.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- for Cloud -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring.cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- fix: start failure in eclipse error: java.lang.IllegalArgumentException: 
+			LoggerFactory is not a Logback LoggerContext but Logback is on the classpath 
+			solution: force using "ch.qos.logback.classic.util.ContextSelectorStaticBinder" 
+			instead of "org.slf4j.impl.SimpleLoggerFactory" -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>3.3.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.transaction/javax.transaction-api -->
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>javax.transaction-api</artifactId>
+
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<!--<dependency> <groupId>commons-logging</groupId> <artifactId>commons-logging</artifactId> 
+			<version>1.1.1</version> </dependency> -->
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.supercsv</groupId>
+			<artifactId>super-csv</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>3.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+
+
+
+		<!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.github.vendigo/ace-mybatis -->
+		<!-- <dependency> <groupId>com.github.vendigo</groupId> <artifactId>ace-mybatis</artifactId> 
+			<version>0.0.1</version> <exclusions> fix: start failure in eclipse error: 
+			java.lang.IllegalArgumentException: LoggerFactory is not a Logback LoggerContext 
+			but Logback is on the classpath solution: force using "ch.qos.logback.classic.util.ContextSelectorStaticBinder" 
+			instead of "org.slf4j.impl.SimpleLoggerFactory" <exclusion> <groupId>org.slf4j</groupId> 
+			<artifactId>slf4j-simple</artifactId> </exclusion> </exclusions> </dependency> -->
+
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.10.1</version>
+		</dependency>
+
+		<!-- <dependency> <groupId>com.ebizprise</groupId> <artifactId>das-utilsweb</artifactId> 
+			<version>${project.version}</version> <type>pom</type> </dependency> -->
+		<dependency>
+			<groupId>com.myjeeva.poi</groupId>
+			<artifactId>excelReader</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<!--<dependency> <groupId>com.ebizprise</groupId> <artifactId>das-apidb</artifactId> 
+			<version>${project.version}</version> </dependency> -->
+		<!-- <dependency> <groupId>com.ebizprise</groupId> <artifactId>das-tenant</artifactId> 
+			<version>${project.version}</version> </dependency> <dependency> -->
+		<!--<groupId>com.ebizprise</groupId> -->
+		<!--<artifactId>das-auth</artifactId> -->
+		<!--<version>${project.version}</version> -->
+		<!--</dependency> -->
+
+
+
+		<!-- dependency> <groupId>com.ebizprise</groupId> <artifactId>das-extdb</artifactId> 
+			<version>${project.version}</version> </dependency> <dependency> <groupId>com.ebizprise</groupId> 
+			<artifactId>das-etldb</artifactId> <version>${project.version}</version> 
+			</dependency> <dependency> <groupId>com.ebizprise</groupId> <artifactId>das-sumaxfe</artifactId> 
+			<version>${project.version}</version> </dependency -->
+		<!--<dependency> -->
+		<!--<groupId>com.ebizprise</groupId> -->
+		<!--<artifactId>das-recmddb</artifactId> -->
+		<!--<version>${project.version}</version> -->
+		<!--</dependency> -->
+
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>${fastjson.version}</version>
+		</dependency>
+
+		<!--开启 cache 缓存 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<!-- ehcache 缓存 -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+		</dependency>
+		<!--<dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-test</artifactId> 
+			</dependency> https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+
+		<!-- https://mvnrepository.com/artifact/log4j/log4j <dependency> <groupId>log4j</groupId> 
+			<artifactId>log4j</artifactId> <version>1.2.17</version> </dependency> -->
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-tomcat</artifactId> 
+			<scope>test</scope> </dependency> -->
+
+		<!-- <dependency> <groupId>com.ebizprise</groupId> <artifactId>das-utilsweb</artifactId> 
+			<version>1.0-SNAPSHOT</version> </dependency> -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>de.codecentric</groupId>
+			<artifactId>spring-boot-admin-starter-client</artifactId>
+			<version>1.5.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		
+	</dependencies>
+
+	<!--spring boot打包的话需要指定一个唯一的入门 -->
+	<build>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<!-- 指定该Main Class为全局的唯一入口 -->
+					<mainClass>com.ebizprise.das.WebApplication</mainClass>
+					<layout>ZIP</layout>
+					<!--<delimiters> -->
+					<!--<delimiter>@</delimiter> -->
+					<!--</delimiters> -->
+					<!--<useDefaultDelimiters>false</useDefaultDelimiters> -->
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal><!--可以把依赖的包都打包到生成的Jar包中 -->
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

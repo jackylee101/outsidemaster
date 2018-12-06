@@ -1,0 +1,106 @@
+sqlIp: 192.168.128.22:1433
+sqlusername: ForecastUsr
+sqlpassword: ForecastUsr
+
+#激活哪一个环境的配置文件
+#公共配置
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  application:
+    name: outside
+
+
+# DAS WEB
+  recmddb:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=RECMD_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+  authen:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=AUTHEN_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+
+  tenant:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=TENANT_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+
+  api:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=API_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+
+  http:
+      multipart:
+        max-file-size: 512MB
+        max-request-size: 512MB
+
+  jpa:
+    database: SQL_SERVER
+    show-sql: true
+
+  storage:
+    location: /opt/recmd/download2/
+
+  ## Hibernate ddl auto (validate|create|create-drop|update)
+    hibernate:
+      ddl-auto: validate
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      dialect: com.ebizprise.das.dialect.NvarcharSQLServerDialect
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+
+  mail:
+    host: 192.168.128.2
+#    username: testbiz@ebizprise.com
+    username: testbiz
+    password: ebizprise
+    defaultEncoding: UTF-8
+    port: 587
+    tls: true
+    properties.mail.smtp:
+        auth: true
+        starttls.enable: true
+        ssl.trust: 192.168.128.2
+
+baseUrl:
+  engineUrl: http://192.168.128.23:8089/?bid=
+  apiUrl: http://218.210.49.243:8080
+  dbUrl: http://192.168.128.22:8076
+  
+  syncCityList: dev
+  syncCities: 1
+  syncEnable: true
+  syncServer: dev
+  syncUrl1: http://127.0.0.1:8075ffdsf
+  syncUrl2: http://127.0.0.1:8075
+  syncUrl3: http://192.168.128.23:8075
+  
+#  mailFrom: rds.rollingdemand@ebizprise.com
+  mailFrom: testbiz@ebizprise.com
+  faceNum: 3
+
+scheduledtasks:
+  trigtime: "7 30 22 * * ?"
+  
+folder:
+  # sales 数据存储目录
+  salesDatafolderPath: /Users/maduar/test/rollingdemond/dataapi/salesDataFolder
+  salesDataPath:
+    salesdata: salesdata
+    productdata: productdata
+    customergroupdata: customergroupdata
+    customerdata: customerdata
+    storedata: storedata
+    recmdgoodsdata: recmdgoodsdata

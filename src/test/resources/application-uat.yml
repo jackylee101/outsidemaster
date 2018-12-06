@@ -1,0 +1,82 @@
+sqlIp: 47.96.28.187:1433
+sqlusername: DASeBizer
+sqlpassword: reziBeSAD
+
+defaultPath: /Users/maduar/demo/files
+#defaultPath: /mnt/vdb1/outside
+
+spring:
+
+# DAS WEB
+  recmddb:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=RECMD_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+  authen:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=AUTHEN_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+
+  tenant:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=TENANT_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+  api:
+    datasource:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      url: jdbc:sqlserver://${sqlIp};databaseName=API_DB
+      username: ${sqlusername}
+      password: ${sqlpassword}
+
+  http:
+      multipart:
+        max-file-size: 512MB
+        max-request-size: 512MB
+
+  jpa:
+    database: SQL_SERVER
+    show-sql: true
+
+  storage:
+    location: /opt/recmd/download2/
+
+  ## Hibernate ddl auto (validate|create|create-drop|update)
+    hibernate:
+      ddl-auto: validate
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      dialect: com.ebizprise.das.dialect.NvarcharSQLServerDialect
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+  mail:
+    host: smtp.163.com
+    username: maduar@163.com
+    password: 163maduar310
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+#sendMailFrom: rds.rollingdemand@ebizprise.com
+sendMailFrom: maduar@163.com
+
+folder:
+  # sales 数据存储目录
+  salesDatafolderPath: /mnt/vdb1/dataapi
+  salesDataPath:
+    salesdata: salesdata
+    productdata: productdata
+    customergroupdata: customergroupdata
+    customerdata: customerdata
+    storedata: storedata
+    recmdgoodsdata: recmdgoodsdata

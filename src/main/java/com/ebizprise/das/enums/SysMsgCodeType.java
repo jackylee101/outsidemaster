@@ -1,0 +1,42 @@
+package com.ebizprise.das.enums;
+
+public enum SysMsgCodeType {
+	
+	//STATUS_CODE = 'MAIL'
+	MAIL001("MAIL001"),		//帳號開通信			:RollingDemand帳號開通成功！
+	MAIL002("MAIL002"),		//step10開始預測通知信	:RollingDemand預測數据全力运算中！
+	MAIL003("MAIL003"),		//預測完成信			:您汇入RollingDemand的預測數据已经完成！
+	MAIL004("MAIL004"),		//密碼重置信			:您的RollingDemand重置密码邮件来了！
+	
+	USER_NAME("${USER_NAME}"),	//userName
+	USRPWD("${USRPWD}"),
+	URL("${URL}"),
+	URL_NAME("${URL_NAME}"),
+	
+	SYS001("SYS001"),
+	
+	ERR001("ERR001"), ERR002("ERR002"), ERR003("ERR003"), ERR004("ERR004"), ERR005("ERR005"),
+	ERR006("ERR006"), ERR007("ERR007"), ERR008("ERR008"), ERR009("ERR009"), ERR010("ERR010"),
+	ERR011("ERR011"), ERR012("ERR012"), ERR013("ERR013"), ERR014("ERR014"), ERR015("ERR015"),
+	ERR016("ERR016"), ERR017("ERR017"), ERR018("ERR018"), ERR019("ERR019"), ERR020("ERR020"),
+	ERR021("ERR021"), ERR022("ERR022"), ERR023("ERR023"), ERR024("ERR024"), ERR025("ERR025"),
+	ERR026("ERR026"), ERR027("ERR027"), ERR028("ERR028"), ERR029("ERR029"), ERR030("ERR030"),
+	ERR031("ERR031"), ERR032("ERR032"), ERR033("ERR033"), ERR034("ERR034"), ERR035("ERR035"),
+	ERR036("ERR036"), ERR037("ERR037"), ERR038("ERR038"), ERR039("ERR039"), ERR040("ERR040"),
+	ERR041("ERR041"), ERR042("ERR042"), ERR043("ERR043"), ERR044("ERR044"), ERR045("ERR045"),
+	ERR046("ERR046"), ERR047("ERR047"), ERR048("ERR048"), ERR049("ERR049"), ERR050("ERR050"),
+	
+	
+	ERR996("ERR996"), ERR997("ERR997"), ERR999("ERR999"), 
+	;
+	
+	SysMsgCodeType(String code) {
+		this.code = code;
+	}
+
+	private String code;
+
+	public String getCode() {
+		return code;
+	}
+}
