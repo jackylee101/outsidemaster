@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -99,7 +100,7 @@ public class ReloadConfig {
 				logger.info("採用內部設定檔: " + mainConfigPath);
 
 				subConfigPath = "/application.yml";
-				if(profile!=null)
+				if (profile != null)
 					subConfigPath = "/application-" + profile + ".yml";
 				uri2 = this.getClass().getResource(subConfigPath).toURI();
 				subConfigPath = uri2.getPath();
@@ -136,14 +137,23 @@ public class ReloadConfig {
 					configFileName);
 
 			YamlPropertySourceLoader yamLoader = new YamlPropertySourceLoader();
-			PropertySource<LinkedHashMap> yamProp = (PropertySource<LinkedHashMap>) yamLoader
-					.load("YamFileName", fileSystemResource, null);
 
+			List<PropertySource<?>> yamPropList = yamLoader.load("YamFileName",
+					fileSystemResource);
+			
 			MutablePropertySources sources = env.getPropertySources();
-			sources.addFirst(yamProp);
-
-			LinkedHashMap linkedHashMap = yamProp.getSource();
-			logger.warn(configFileName + " props size: " + linkedHashMap.size());
+			
+			for (int i = 0; i < yamPropList.size(); i++) {
+				PropertySource<LinkedHashMap> yamProp = (PropertySource<LinkedHashMap>) yamPropList
+						.get(i);
+				sources.addFirst(yamProp);
+				
+				LinkedHashMap linkedHashMap = yamProp.getSource();
+				logger.warn(configFileName + " props size: " + linkedHashMap.size());
+				
+			}
+//			PropertySource<LinkedHashMap> yamProp = (PropertySource<LinkedHashMap>) yamLoader
+//					.load("YamFileName", fileSystemResource);
 
 		} catch (Exception e) {
 			e.printStackTrace();

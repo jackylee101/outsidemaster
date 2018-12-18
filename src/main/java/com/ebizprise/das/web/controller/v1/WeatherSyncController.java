@@ -34,9 +34,10 @@ public class WeatherSyncController {
 	}
 
 	@RequestMapping("/takeWeatherDate2DBtest")
-	public @ResponseBody List takeWeatherDate2DBtest() {
+	public @ResponseBody List takeWeatherDate2DBtest(
+			@RequestParam(value = "syncServer", required = false) String syncServer) {
 
-		List list = weatherSync.takeWeatherDate2DBtest();
+		List list = weatherSync.takeWeatherDate2DBtest(syncServer);
 		return list;
 	}
 

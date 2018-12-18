@@ -13,7 +13,7 @@
 		<!-- junit版本号 <junit.version>4.12</junit.version> -->
 		<fastjson.version>1.2.40</fastjson.version>
 		<maven-site-plugin.version>3.7</maven-site-plugin.version>
-		<spring.cloud.version>Dalston.SR1</spring.cloud.version>
+		<spring.cloud.version>Finchley.RELEASE</spring.cloud.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 		<project.version>0.1-SNAPSHOT</project.version>
@@ -26,7 +26,7 @@
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>1.5.1.RELEASE</version>
+				<version>2.0.7.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -94,10 +94,8 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>org.json</groupId> <artifactId>json</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
@@ -124,10 +122,8 @@
 			<artifactId>commons-lang</artifactId>
 			<version>2.4</version>
 		</dependency>
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>commons-beanutils</groupId> <artifactId>commons-beanutils</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>net.sf.supercsv</groupId>
@@ -158,10 +154,8 @@
 
 
 		<!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>commons-collections</groupId> <artifactId>commons-collections</artifactId> 
+			</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/com.github.vendigo/ace-mybatis -->
 		<!-- <dependency> <groupId>com.github.vendigo</groupId> <artifactId>ace-mybatis</artifactId> 
@@ -235,10 +229,8 @@
 		<!-- https://mvnrepository.com/artifact/log4j/log4j <dependency> <groupId>log4j</groupId> 
 			<artifactId>log4j</artifactId> <version>1.2.17</version> </dependency> -->
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-eureka-server</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>org.springframework.cloud</groupId> <artifactId>spring-cloud-starter-eureka-server</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
@@ -271,18 +263,32 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-starter-client</artifactId>
-			<version>1.5.2</version>
-		</dependency>
+		<!-- <dependency> <groupId>de.codecentric</groupId> <artifactId>spring-boot-admin-starter-client</artifactId> 
+			<version>1.5.2</version> </dependency> -->
 
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.netflix.archaius</groupId>
+			<artifactId>archaius-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+		</dependency>
 	</dependencies>
 
 	<!--spring boot打包的话需要指定一个唯一的入门 -->

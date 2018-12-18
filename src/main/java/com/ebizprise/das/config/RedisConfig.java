@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 
+import redis.clients.jedis.JedisPoolConfig;
+
 @Configuration
 // @ComponentScan("com.michaelcgood")
 public class RedisConfig {
@@ -17,6 +19,7 @@ public class RedisConfig {
 		jedisConFactory.setHostName("localhost");
 		jedisConFactory.setPort(6379);
 		jedisConFactory.setPassword("xxxxx");
+		jedisConFactory.setPoolConfig(new JedisPoolConfig());
 		return jedisConFactory;
 	}
 
