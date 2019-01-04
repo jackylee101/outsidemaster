@@ -14,6 +14,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ebizprise.das.scheduled.service.weather.WeatherSync;
 
+/**
+ * description:
+ * 
+ * @author Jacky
+ * @date 21/12/2018 18:20 PM
+ * @email jacky.lee@ebizprise.com
+ */
+
 @Controller
 @RequestMapping("/")
 public class WeatherSyncController {
@@ -25,9 +33,9 @@ public class WeatherSyncController {
 
 	@RequestMapping("/takeWeatherDate2DB")
 	public @ResponseBody Map<String, String> takeWeatherDate2DB(
-			@RequestParam(value = "etlDate", required = true) String etlDate,
+			@RequestParam(value = "etlDate", required = false) String etlDate,
 			@RequestParam(value = "syncServer", required = false) String syncServer) {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<String, String>(16);
 
 		weatherSync.takeWeatherDate2DB(etlDate, syncServer);
 		return map;
@@ -35,9 +43,9 @@ public class WeatherSyncController {
 
 	@RequestMapping("/takeWeatherDate2DBtest")
 	public @ResponseBody List takeWeatherDate2DBtest(
+			@RequestParam(value = "etlDate", required = false) String etlDate,
 			@RequestParam(value = "syncServer", required = false) String syncServer) {
-
-		List list = weatherSync.takeWeatherDate2DBtest(syncServer);
+		List list = weatherSync.takeWeatherDate2DBtest(etlDate, syncServer);
 		return list;
 	}
 

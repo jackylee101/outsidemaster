@@ -1,11 +1,14 @@
 package com.ebizprise.das.scheduled.service.weather.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.slf4j.Logger;
@@ -20,7 +23,9 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.ebizprise.das.WebApplication;
 import com.ebizprise.das.db.entity.DailyWeather;
+import com.ebizprise.das.db.entity.WeatherLocationMap;
 import com.ebizprise.das.db.repository.DailyWeatherRepository;
+import com.ebizprise.das.db.repository.WeatherLocationMapRepository;
 import com.ebizprise.das.scheduled.service.weather.WeatherSync;
 import com.ebizprise.das.utils.CommonUtils;
 import com.ebizprise.das.utils.DateUtil;
@@ -37,8 +42,8 @@ import com.ebizprise.das.utils.HttpUtils452;
 public class WeatherSyncImpl implements WeatherSync {
 	private static final Logger logger = LoggerFactory
 			.getLogger(WebApplication.class);
-	private String etl_date;
-	private JSONArray codeList;
+	// private String etl_date;
+	// private JSONArray cityList;
 
 	@Autowired
 	ConfigurableEnvironment env;
@@ -46,8 +51,8 @@ public class WeatherSyncImpl implements WeatherSync {
 	// @Autowired
 	// private OutsideConfig outsideConfig;
 	//
-	// @Autowired
-	// private CodeUtilsCommon codeUtilsCommon;
+	@Autowired
+	private WeatherLocationMapRepository weatherLocationMapRepository;
 
 	// @Autowired
 	// private RedisRepository redisRepository;
@@ -117,41 +122,43 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 天氣資料同步作業--主入口兼手動驅動入口
 	 */
 	public void takeWeatherDate2DB(String etlDate, String syncServer) {
-		this.etl_date = etlDate;
+		if (etlDate == null)
+			etlDate = DateUtil.acquireEtlDate(0);
+
 		if (syncServer == null)// 手動如果沒有指定環境
 			syncServer = "dev";// 就只會讓dev環境執行同步更新
 
 		if (isSyncEnable()) {
 			if (StringUtils.indexOf(syncServer, "prod") >= 0) {
-				updateEtlDatefor(getSyncUrl1());// 更新ETL基準日Prod
+				updateEtlDatefor(etlDate, getSyncUrl1());// 更新ETL基準日Prod
 			}
 			if (StringUtils.indexOf(syncServer, "staging") >= 0) {
-				updateEtlDatefor(getSyncUrl2());// 更新ETL基準日dev
+				updateEtlDatefor(etlDate, getSyncUrl2());// 更新ETL基準日dev
 			}
 			if (StringUtils.indexOf(syncServer, "dev") >= 0) {
-				updateEtlDatefor(getSyncUrl3());// 更新ETL基準日dev
+				updateEtlDatefor(etlDate, getSyncUrl3());// 更新ETL基準日dev
 			}
 		} else {
 			logger.warn("同步不執行,syncEnable: " + isSyncEnable());
 		}
 		String cityListSrc = takeSrc(getSyncCityList());
 
-		if (!obtainCityIds(cityListSrc))
+		List<WeatherLocationMap> cityList = obtainCityIds(cityListSrc);
+
+		if (!mession6(cityList, etlDate))
 			return;
-		if (!mession6())
-			return;
-		if (!mession7())
+		if (!mession7(cityList, etlDate))
 			return;
 
 		if (isSyncEnable()) {
 			if (StringUtils.indexOf(syncServer, "prod") >= 0) {
-				syncServer(getSyncUrl1());// 開始同步Prod資料
+				syncServer(cityList, etlDate, getSyncUrl1());// 開始同步Prod資料
 			}
 			if (StringUtils.indexOf(syncServer, "staging") >= 0) {
-				syncServer(getSyncUrl2());// 開始同步Staging資料
+				syncServer(cityList, etlDate, getSyncUrl2());// 開始同步Staging資料
 			}
 			if (StringUtils.indexOf(syncServer, "dev") >= 0) {
-				syncServer(getSyncUrl3());// 開始同步Dev資料
+				syncServer(cityList, etlDate, getSyncUrl3());// 開始同步Dev資料
 			}
 		}
 	}
@@ -179,10 +186,9 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 更新ETL基準日Prod
 	 */
-	private boolean updateEtlDatefor(String host) {
+	private boolean updateEtlDatefor(String etlDate, String host) {
 		boolean b = true;
-		String path = CommonUtils.PRIFIX + "/apiUpdateETL_date/"
-				+ this.etl_date;
+		String path = CommonUtils.PRIFIX + "/apiUpdateETL_date/" + etlDate;
 		String method = "GET";
 		// Map<String, String> headers = new HashMap<String, String>();
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -213,40 +219,79 @@ public class WeatherSyncImpl implements WeatherSync {
 
 	/*
 	 * 
+	 * 取得指定城市
+	 */
+	protected List<WeatherLocationMap> obtainCityIds(String host) {
+		List<WeatherLocationMap> list1 = weatherLocationMapRepository.findAll();
+
+		List<WeatherLocationMap> list2 = obtainCityIds1(host);
+		if (list2 == null) {
+			return list1;
+		}
+
+		if (list2.size() > list1.size()) {
+			weatherLocationMapRepository.deleteAll();
+			weatherLocationMapRepository.saveAll(list2);
+			return list2;
+		}
+		if (list2.size() == list1.size()) {
+			return list2;
+		} else {
+			return list1;
+		}
+
+	}
+
+	/*
+	 * 
 	 * 由ShowAPI取得指定城市
 	 */
-	protected boolean obtainCityIds(String host) {
-		boolean b = true;
+	protected List obtainCityIds1(String host) {
 		String path = CommonUtils.PRIFIX + "/apiSelectAPI_City_ID_Mapping";
 		String method = "GET";
 		Map<String, Object> params = new HashMap<String, Object>();
 		HttpEntity httpEntity = null;
 
 		int sum = 0;
-		String objectStr;
+		List cityList2 = new ArrayList();
 		try {
-			objectStr = HttpUtils452.doGet(host + path, params, 50000);
+			String objectStr = HttpUtils452.doGet(host + path, params, 50000);
 			// 获取response的body
 			JSONObject jsonObject = JSONObject.parseObject(objectStr);
-			codeList = (JSONArray) jsonObject.get("codeList");
-			// JSONObject hsin = codeList.getJSONObject(307);
-			// codeList = new JSONArray();
-			// codeList.put(0, hsin);
-
+			JSONArray codeList = (JSONArray) jsonObject.get("codeList");
+			// JSONObject hsin = cityList.getJSONObject(307);
+			// cityList = new JSONArray();
+			// cityList.put(0, hsin);
 			String msgCode = (String) jsonObject.get("msgCode");
 			if ("error".equals(msgCode)) {
 				String msgDesc = (String) jsonObject.get("msgDesc");
 				logger.error(msgDesc);
-				b = false;
 			} else {
+				for (int i = 0; i < codeList.size(); i++) {
+					JSONObject city = codeList.getJSONObject(i);
+
+					String createDate = (String) city.get("createDate");
+					SimpleDateFormat formatter = new SimpleDateFormat(
+							"yyyy-MM-dd hh:mm:ss");
+					Date createDate1 = new Date();
+					try {
+						createDate1 = formatter.parse(createDate);
+					} catch (Exception e) {
+					}
+					city.put("createDate", createDate1);
+
+					WeatherLocationMap weatherLocationMap = new WeatherLocationMap();
+					BeanUtils.copyProperties(weatherLocationMap, city);
+					cityList2.add(weatherLocationMap);
+				}
 				logger.debug(objectStr);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
 			logger.info("api SelectAPI City_ID_Mapping from " + host
-					+ " result:" + b);
-			return b;
+					+ " result:" + cityList2.size());
+			return cityList2;
 		}
 	}
 
@@ -254,8 +299,8 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 指定城市321之一
 	 */
-	private boolean mession6() {
-		int sum = api3rdWData(this.etl_date, new StringBuffer());
+	private boolean mession6(List<WeatherLocationMap> cityList, String etlDate) {
+		int sum = api3rdWData(cityList, etlDate, new StringBuffer());
 		// if (sum == 0)
 		// return false;
 		return true;
@@ -265,9 +310,10 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 指定城市320之一 如果出現exception(最常見是redis忘了開) 會把訊息印出
 	 */
-	private String mession6test() {
+	private String mession6test(List<WeatherLocationMap> cityList,
+			String etlDate) {
 		StringBuffer sb = new StringBuffer();
-		int sum = api3rdWData_test(this.etl_date, sb);
+		int sum = api3rdWData_test(cityList, etlDate, sb);
 		if (sum == -1)
 			return sb.toString();
 		return "";
@@ -277,8 +323,8 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 指定城市321之2
 	 */
-	private boolean mession7() {
-		int sum = api3rdWD15(this.etl_date, new StringBuffer());
+	private boolean mession7(List<WeatherLocationMap> cityList, String etlDate) {
+		int sum = api3rdWD15(cityList, etlDate, new StringBuffer());
 		return true;
 	}
 
@@ -286,16 +332,17 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 開始同步Prod資料
 	 */
-	private boolean syncServer(String syncUrl) {
-		boolean b1 = mession9(syncUrl);
+	private boolean syncServer(List<WeatherLocationMap> cityList,
+			String etlDate, String syncUrl) {
+		boolean b1 = mession9(cityList, etlDate, syncUrl);
 		if (!b1)
 			logger.error("七日預測數據同步有誤: " + syncUrl);
 
-		boolean b2 = mession10(syncUrl);
+		boolean b2 = mession10(cityList, etlDate, syncUrl);
 		if (!b2)
 			logger.error("15日預測數據同步有誤: " + syncUrl);
 
-		boolean b3 = mession11(syncUrl);
+		boolean b3 = mession11(etlDate, syncUrl);
 		if (!b3)
 			logger.error("呼叫sp有誤: " + syncUrl);
 		return b3;
@@ -305,7 +352,7 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 開始同步Prod資料
 	 */
-	private boolean syncServerTest(String syncUrl) {
+	private boolean syncServerTest(String etlDate, String syncUrl) {
 		// boolean b1 = mession9(syncUrl);
 		// if (!b1)
 		// logger.error("七日預測數據同步有誤: " + syncUrl);
@@ -314,7 +361,7 @@ public class WeatherSyncImpl implements WeatherSync {
 		// if (!b2)
 		// logger.error("15日預測數據同步有誤: " + syncUrl);
 
-		boolean b3 = mession99(syncUrl);
+		boolean b3 = mession99(etlDate, syncUrl);
 		if (!b3)
 			logger.error("呼叫sp有誤: " + syncUrl);
 		return b3;
@@ -324,16 +371,19 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 觸發321城市資料填充之1
 	 */
-	private boolean mession9(String host) {
-		return apiInsertWEATHER_DATA(host, this.etl_date, new StringBuffer());
+	private boolean mession9(List<WeatherLocationMap> cityList, String etlDate,
+			String host) {
+		return apiInsertWEATHER_DATA(cityList, host, etlDate,
+				new StringBuffer());
 	}
 
 	/*
 	 * 
 	 * 觸發321城市資料填充之2
 	 */
-	private boolean mession10(String host) {
-		return apiInsertWEATHER_DATA_PRE15(host, this.etl_date,
+	private boolean mession10(List<WeatherLocationMap> cityList,
+			String etlDate, String host) {
+		return apiInsertWEATHER_DATA_PRE15(cityList, host, etlDate,
 				new StringBuffer());
 	}
 
@@ -341,16 +391,16 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * 觸發SP
 	 */
-	private boolean mession11(String host) {
-		return apiEXEC_SP(host, this.etl_date, new StringBuffer());
+	private boolean mession11(String etlDate, String host) {
+		return apiEXEC_SP(host, etlDate, new StringBuffer());
 	}
 
 	/*
 	 * 
 	 * 觸發測試SP
 	 */
-	private boolean mession99(String host) {
-		return apiEXEC_TEST(host, this.etl_date, new StringBuffer());
+	private boolean mession99(String etlDate, String host) {
+		return apiEXEC_TEST(host, etlDate, new StringBuffer());
 	}
 
 	/**
@@ -360,18 +410,19 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * @param sb
 	 * @return
 	 */
-	private Integer api3rdWData(String etlDate, StringBuffer sb) {
+	private Integer api3rdWData(List<WeatherLocationMap> cityList,
+			String etlDate, StringBuffer sb) {
 		int sum = 0;
 
-		logger.info("目標 " + codeList.size() + " 個城市");
-		for (int i = 0; i < codeList.size() && i < getSyncCities(); i++) {
+		logger.info("目標 " + cityList.size() + " 個城市");
+		for (int i = 0; i < cityList.size() && i < getSyncCities(); i++) {
 			JSONObject jSONObject;
 			try {
-				jSONObject = codeList.getJSONObject(i);
-				String c11 = jSONObject.getString("c11");
-				String c12 = jSONObject.getString("c12");
-				String areaid = jSONObject.getString("areaid");
-				String area = jSONObject.getString("area");
+				WeatherLocationMap weatherLocationMap = cityList.get(i);
+				String c11 = weatherLocationMap.getC11();
+				String c12 = weatherLocationMap.getC12();
+				String areaid = weatherLocationMap.getAreaid();
+				String area = weatherLocationMap.getArea();
 				if ("".equals(c11)) {
 					String ss = areaid + "(" + area + ")" + " 沒有c11";
 					logger.error(ss);
@@ -394,7 +445,7 @@ public class WeatherSyncImpl implements WeatherSync {
 					String message = area + "(" + areaid + "): " + objectStr;
 					logger.info(message);
 
-					objectStr = changeCityInfo(objectStr, jSONObject);
+					objectStr = changeCityInfo(objectStr, weatherLocationMap);
 
 					// MyMap myMap = new MyMap("apiWData", key, objectStr);
 					DailyWeather dailyWeather = new DailyWeather(key, objectStr);
@@ -423,18 +474,18 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * @param sb
 	 * @return
 	 */
-	private Integer api3rdWData_test(String etlDate, StringBuffer sb) {
+	private Integer api3rdWData_test(List<WeatherLocationMap> cityList,
+			String etlDate, StringBuffer sb) {
 		int sum = 0;
 
-		logger.info("目標 " + codeList.size() + " 個城市");
-		for (int i = 0; i < codeList.size() && i < getSyncCities(); i++) {
-			JSONObject jSONObject;
+		logger.info("目標 " + cityList.size() + " 個城市");
+		for (int i = 0; i < cityList.size() && i < getSyncCities(); i++) {
 			try {
-				jSONObject = codeList.getJSONObject(i);
-				String c11 = jSONObject.getString("c11");
-				String c12 = jSONObject.getString("c12");
-				String areaid = jSONObject.getString("areaid");
-				String area = jSONObject.getString("area");
+				WeatherLocationMap weatherLocationMap = cityList.get(i);
+				String c11 = weatherLocationMap.getC11();
+				String c12 = weatherLocationMap.getC12();
+				String areaid = weatherLocationMap.getAreaid();
+				String area = weatherLocationMap.getArea();
 				if ("".equals(c11)) {
 					String ss = areaid + "(" + area + ")" + " 沒有c11";
 					logger.error(ss);
@@ -485,7 +536,8 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * @param jSONObject
 	 * @return
 	 */
-	private String changeCityInfo(String objectStr, JSONObject jSONObject) {
+	private String changeCityInfo(String objectStr,
+			WeatherLocationMap weatherLocationMap) {
 		JSONObject jsonObject2 = null;
 		JSONObject showapi_res_body = null;
 		JSONObject cityInfo = null;
@@ -496,12 +548,12 @@ public class WeatherSyncImpl implements WeatherSync {
 			cityInfo = showapi_res_body.getJSONObject("cityInfo");
 
 			String areaid2 = cityInfo.getString("c1");
-			String areaid1 = jSONObject.getString("areaid");
+			String areaid1 = weatherLocationMap.getAreaid();
 
 			if (!areaid1.equals(areaid2)) {
-				String c1 = jSONObject.getString("c1");
-				String c2 = jSONObject.getString("c2");
-				String c3 = jSONObject.getString("c3");
+				String c1 = weatherLocationMap.getC1();
+				String c2 = weatherLocationMap.getC2();
+				String c3 = weatherLocationMap.getC3();
 				cityInfo.put("c1", c1);
 				cityInfo.put("c2", c2);
 				cityInfo.put("c3", c3);
@@ -523,18 +575,18 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * @param sb
 	 * @return
 	 */
-	private Integer api3rdWD15(String etlDate, StringBuffer sb) {
+	private Integer api3rdWD15(List<WeatherLocationMap> cityList,
+			String etlDate, StringBuffer sb) {
 		int sum = 0;
 
-		logger.info("目標 " + codeList.size() + " 個城市");
-		for (int i = 0; i < codeList.size() && i < getSyncCities(); i++) {
-			JSONObject jSONObject;
+		logger.info("目標 " + cityList.size() + " 個城市");
+		for (int i = 0; i < cityList.size() && i < getSyncCities(); i++) {
 			try {
-				jSONObject = codeList.getJSONObject(i);
-				String c11 = jSONObject.getString("c11");
-				String c12 = jSONObject.getString("c12");
-				String areaid = jSONObject.getString("areaid");
-				String area = jSONObject.getString("area");
+				WeatherLocationMap weatherLocationMap = cityList.get(i);
+				String areaid = weatherLocationMap.getAreaid();
+				String c11 = weatherLocationMap.getC11();
+				String c12 = weatherLocationMap.getC12();
+				String area = weatherLocationMap.getArea();
 				if ("".equals(c11)) {
 					String ss = areaid + "(" + area + ")" + " 沒有c11";
 					logger.error(ss);
@@ -557,8 +609,6 @@ public class WeatherSyncImpl implements WeatherSync {
 					dailyWeatherRepository.save(dailyWeather);
 					sum += 1;
 				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			} catch (RedisConnectionFailureException ex) {
 				ex.printStackTrace();
 				sb.append(ex.getMessage());
@@ -693,16 +743,16 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * @param sb
 	 * @return false:至少有一個城市更新時出現錯誤
 	 */
-	private boolean apiInsertWEATHER_DATA(String host, String etlDate,
-			StringBuffer sb) {
+	private boolean apiInsertWEATHER_DATA(List<WeatherLocationMap> cityList,
+			String host, String etlDate, StringBuffer sb) {
 		boolean bAll = true;
 
-		logger.info("目標 " + codeList.size() + " 個城市");
-		for (int i = 0; i < codeList.size() && i < getSyncCities(); i++) {
+		logger.info("目標 " + cityList.size() + " 個城市");
+		for (int i = 0; i < cityList.size() && i < getSyncCities(); i++) {
 			boolean b = false;
 			try {
-				JSONObject jSONObject = codeList.getJSONObject(i);
-				String areaid = jSONObject.getString("areaid");
+				WeatherLocationMap weatherLocationMap = cityList.get(i);
+				String areaid = weatherLocationMap.getAreaid();
 
 				String key = "apiWData_" + etlDate + "_" + areaid;
 				Optional<DailyWeather> dailyWeatherOpt = dailyWeatherRepository
@@ -711,7 +761,7 @@ public class WeatherSyncImpl implements WeatherSync {
 
 				if (dailyWeather != null) {
 					String objectStr = dailyWeather.getJsonData();
-					b = apiInsertWEATHER_DATA(host, areaid, objectStr);
+					b = apiInsertWEATHER_DATA(etlDate, host, areaid, objectStr);
 				} else {
 					logger.error(etlDate + "沒有" + areaid);
 					continue;
@@ -734,16 +784,17 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * @param sb
 	 * @return false:至少有一個城市更新時出現錯誤
 	 */
-	private boolean apiInsertWEATHER_DATA_PRE15(String host, String etlDate,
+	private boolean apiInsertWEATHER_DATA_PRE15(
+			List<WeatherLocationMap> cityList, String host, String etlDate,
 			StringBuffer sb) {
 		boolean bAll = true;
 
-		logger.info("目標 " + codeList.size() + " 個城市");
-		for (int i = 0; i < codeList.size() && i < getSyncCities(); i++) {
+		logger.info("目標 " + cityList.size() + " 個城市");
+		for (int i = 0; i < cityList.size() && i < getSyncCities(); i++) {
 			boolean b = false;
 			try {
-				JSONObject jSONObject = codeList.getJSONObject(i);
-				String areaid = jSONObject.getString("areaid");
+				WeatherLocationMap weatherLocationMap = cityList.get(i);
+				String areaid = weatherLocationMap.getAreaid();
 
 				String key = "apiWD15_" + etlDate + "_" + areaid;
 				Optional<DailyWeather> dailyWeatherOpt = dailyWeatherRepository
@@ -752,7 +803,8 @@ public class WeatherSyncImpl implements WeatherSync {
 
 				if (dailyWeather != null) {
 					String objectStr = dailyWeather.getJsonData();
-					b = apiInsertWEATHER_DATA_PRE15(host, areaid, objectStr);
+					b = apiInsertWEATHER_DATA_PRE15(etlDate, host, areaid,
+							objectStr);
 				} else {
 					logger.error(etlDate + "沒有" + areaid);
 					continue;
@@ -777,7 +829,7 @@ public class WeatherSyncImpl implements WeatherSync {
 	 */
 	private boolean apiEXEC_SP(String host, String etlDate, StringBuffer sb) {
 		boolean b = true;
-		String path = CommonUtils.PRIFIX + "/apiEXEC_SP/" + etl_date;
+		String path = CommonUtils.PRIFIX + "/apiEXEC_SP/" + etlDate;
 		String method = "GET";
 		Map<String, Object> params = new HashMap<String, Object>();
 		HttpEntity httpEntity = null;
@@ -785,6 +837,7 @@ public class WeatherSyncImpl implements WeatherSync {
 		int sum = 0;
 		String objectStr;
 		try {
+			logger.info("EXEC SP for " + host + " start...");
 			objectStr = HttpUtils452.doGet(host + path, params, 50 * 60 * 1000);
 
 			logger.info(objectStr);
@@ -814,6 +867,7 @@ public class WeatherSyncImpl implements WeatherSync {
 		int sum = 0;
 		String objectStr;
 		try {
+			logger.info("EXEC testSP for " + host + " start...");
 			objectStr = HttpUtils452.doGet(host + path, params, 50 * 60 * 1000);
 
 			logger.info(objectStr);
@@ -823,7 +877,7 @@ public class WeatherSyncImpl implements WeatherSync {
 			b = false;
 			ex.printStackTrace();
 		} finally {
-			logger.info("EXEC SP for " + host + " result:" + b);
+			logger.info("EXEC testSP for " + host + " result:" + b);
 			return b;
 		}
 	}
@@ -834,14 +888,14 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * return true正確 false過程有誤
 	 */
-	private boolean apiInsertWEATHER_DATA(String host, String areaid0,
-			String objectStr) {
+	private boolean apiInsertWEATHER_DATA(String etlDate, String host,
+			String areaid0, String objectStr) {
 		boolean b = true;
 		String path = CommonUtils.PRIFIX + "/apiInsertWEATHER_DATA";
 		String method = "GET";
 		Map<String, Object> headers = new HashMap<String, Object>();
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("etlDate", this.etl_date);
+		params.put("etlDate", etlDate);
 		params.put("areaid0", areaid0);
 		params.put("objectStr", objectStr);
 
@@ -870,14 +924,14 @@ public class WeatherSyncImpl implements WeatherSync {
 	 * 
 	 * return true正確 false過程有誤
 	 */
-	private boolean apiInsertWEATHER_DATA_PRE15(String host, String areaid,
-			String objectStr) {
+	private boolean apiInsertWEATHER_DATA_PRE15(String etlDate, String host,
+			String areaid, String objectStr) {
 		boolean b = true;
 		String path = CommonUtils.PRIFIX + "/apiInsertWEATHER_DATA_PRE15";
 		String method = "GET";
 		Map<String, Object> headers = new HashMap<String, Object>();
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("etlDate", this.etl_date);
+		params.put("etlDate", etlDate);
 		// params.put("areaid0", areaid);
 		params.put("objectStr", objectStr);
 
@@ -903,19 +957,19 @@ public class WeatherSyncImpl implements WeatherSync {
 	/**
 	 * 手動功能測試 用讀取的方式來確認系統正常運作中
 	 */
-	public List takeWeatherDate2DBtest(String syncServer) {
-		this.etl_date = DateUtil.acquireEtlDate(0);
-
-		List list = new ArrayList();
-		String syncServer1 = getSyncServer();
+	public List takeWeatherDate2DBtest(String etlDate, String syncServer) {
+		if (etlDate == null)
+			etlDate = DateUtil.acquireEtlDate(0);
 
 		if (syncServer == null)
-			syncServer = syncServer1;
+			syncServer = getSyncServer();
+
+		List list = new ArrayList();
 
 		list.add("syncCityList: " + getSyncCityList());// 系統內定的讀取城市資料環境來源
 		list.add("syncCities: " + String.valueOf(getSyncCities()));// 系統內定的執行同步城市數
 		list.add("syncEnable: " + String.valueOf(isSyncEnable()));// 系統內定的同步功能啟動
-		list.add("syncServer: " + syncServer1);// 系統內定的執行環境群
+		list.add("syncServer: " + syncServer);// 系統內定的執行環境群
 		list.add("syncUrl1: " + getSyncUrl1());// 系統內定的執行環境1
 		list.add("syncUrl2: " + getSyncUrl2());// 系統內定的執行環境2
 		list.add("syncUrl3: " + getSyncUrl3());// 系統內定的執行環境3
@@ -935,10 +989,10 @@ public class WeatherSyncImpl implements WeatherSync {
 		// }
 		String cityListSrc = takeSrc(getSyncCityList());
 		list.add("cityListSrc: " + cityListSrc);
-		boolean b = obtainCityIds(cityListSrc);
-		list.add("obtainCityIds: " + String.valueOf(b));
-		list.add("obtainCitys: " + String.valueOf(codeList.size()));
-		String checkCityDataExistError = mession6test();
+		List<WeatherLocationMap> cityList = obtainCityIds(cityListSrc);
+		// list.add("obtainCityIds: " + String.valueOf(b));
+		list.add("obtainCitys: " + cityList.size());
+		String checkCityDataExistError = mession6test(cityList, etlDate);
 		list.add("checkCityDataExistError: " + checkCityDataExistError);
 		// return;
 		// if (!mession7())
@@ -947,17 +1001,17 @@ public class WeatherSyncImpl implements WeatherSync {
 		if (isSyncEnable()) {
 			if (StringUtils.indexOf(syncServer, "prod") >= 0) {
 				list.add("check Prod Start: ");
-				boolean b1 = syncServerTest(getSyncUrl1());// 開始同步Prod資料
+				boolean b1 = syncServerTest(etlDate, getSyncUrl1());// 開始同步Prod資料
 				list.add("check Prod end: " + b1);
 			}
 			if (StringUtils.indexOf(syncServer, "staging") >= 0) {
 				list.add("check Uat Start: ");
-				boolean b1 = syncServerTest(getSyncUrl2());// 開始同步Staging資料
+				boolean b1 = syncServerTest(etlDate, getSyncUrl2());// 開始同步Staging資料
 				list.add("check Uat end: " + b1);
 			}
 			if (StringUtils.indexOf(syncServer, "dev") >= 0) {
 				list.add("check Dev Start: ");
-				boolean b1 = syncServerTest(getSyncUrl3());// 開始同步Dev資料
+				boolean b1 = syncServerTest(etlDate, getSyncUrl3());// 開始同步Dev資料
 				list.add("check Dev end: " + b1);
 			}
 		}

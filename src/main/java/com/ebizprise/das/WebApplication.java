@@ -29,7 +29,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @SpringBootApplication
 // @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class,
 // HibernateJpaAutoConfiguration.class })
-@EnableScheduling
+//@EnableScheduling
 // @EnableConfigurationProperties(StorageProperties.class)
 @EnableAutoConfiguration
 // @MapperScan(basePackages = "com.ebizprise.das.db.dao")

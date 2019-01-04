@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,11 +24,17 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ebizprise.das.db.model.MyMap;
 import com.ebizprise.das.db.repository.RedisRepository;
 import com.ebizprise.das.enums.APIStatusCode;
-import com.ebizprise.das.exception.InsertRowException;
 import com.ebizprise.das.form.system.StatusForm;
 import com.ebizprise.das.model.Account;
 import com.ebizprise.das.utils.CommonUtils;
-import com.ebizprise.das.utilsweb.form.jwt.TokenKeyForm;
+
+/**
+ * description:
+ * 
+ * @author Jacky
+ * @date 21/12/2018 18:20 PM
+ * @email jacky.lee@ebizprise.com
+ */
 
 @Controller
 @RequestMapping("/")
@@ -53,7 +58,7 @@ public class WebController {
 	@RequestMapping("/values")
 	public @ResponseBody Map<String, String> findAll() {
 		Map<Object, Object> aa = redisRepository.findAllMyMaps();
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<String, String>(16);
 		for (Map.Entry<Object, Object> entry : aa.entrySet()) {
 			String key = (String) entry.getKey();
 			map.put(key, aa.get(key).toString());

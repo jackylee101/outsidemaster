@@ -54,7 +54,7 @@ public class ReloadConfig {
 	// }
 	// }
 
-	@Bean
+//	@Bean
 	public ScheduledExecutorService checkAllTime() {
 		// 设置回调
 		archaiusTest.addCallback(() -> {

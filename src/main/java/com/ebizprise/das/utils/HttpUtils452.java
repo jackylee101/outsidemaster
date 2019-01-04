@@ -40,6 +40,7 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -81,7 +82,7 @@ public class HttpUtils452 {
 	private static final String ENCODING = "UTF-8";
 
 	/** 出错返回结果 */
-	private static final String RESULT = "-1";
+	// private static final String RESULT = "-1";
 
 	/**
 	 * 初始化连接池管理器,配置SSL
@@ -533,11 +534,9 @@ public class HttpUtils452 {
 	private static String getResult(HttpRequestBase httpRequest,
 			Integer timeOut, boolean isStream) {
 
-		// 响应结果
-		StringBuilder sb = null;
-
 		CloseableHttpResponse response = null;
-
+		JSONObject jSONObject = new JSONObject();
+		String error = "";
 		try {
 			// 获取连接客户端
 			CloseableHttpClient httpClient = getHttpClient(timeOut);
@@ -555,68 +554,75 @@ public class HttpUtils452 {
 			if (200 == respCode) {
 				// 获得响应实体
 				HttpEntity entity = response.getEntity();
-				sb = new StringBuilder();
-
 				// 如果是以流的形式获取
 				if (isStream) {
+					StringBuilder sb = new StringBuilder();
 					BufferedReader br = new BufferedReader(
 							new InputStreamReader(entity.getContent(), ENCODING));
 					String len = "";
 					while ((len = br.readLine()) != null) {
 						sb.append(len);
 					}
+					jSONObject = JSONObject.parseObject(sb.toString());
 				} else {
-					sb.append(EntityUtils.toString(entity, ENCODING));
-					if (sb.length() < 1) {
-						sb.append("-1");
+					String jsonString = EntityUtils.toString(entity, ENCODING);
+					if (jsonString.length() < 1) {
+						jSONObject.put("success", false);
+					} else {
+						jSONObject = JSONObject.parseObject(jsonString);
 					}
 				}
 
 			} else if (403 == respCode) {
-				logger.error("403:錢用光了");
+				error = "403:錢用光了";
 			} else if (404 == respCode) {
-				logger.error("404");
+				error = "404:";
 			} else if (503 == respCode) {
-				logger.error("503:網站掛掉了");
+				error = "503:網站掛掉了";
 			}
+		} catch (HttpHostConnectException e) {
+			error = "连接失敗!!!";
+			e.printStackTrace();
 		} catch (ConnectionPoolTimeoutException e) {
-			logger.error("从连接池获取连接超时!!!");
+			error = "从连接池获取连接超时!!!";
 			e.printStackTrace();
 		} catch (SocketTimeoutException e) {
-			logger.error("响应超时");
+			error = "响应超时";
 			e.printStackTrace();
 		} catch (ConnectTimeoutException e) {
-			logger.error("请求超时");
+			error = "请求超时";
 			e.printStackTrace();
 		} catch (ClientProtocolException e) {
-			logger.error("http协议错误");
+			error = "http协议错误";
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			logger.error("不支持的字符编码");
+			error = "不支持的字符编码";
 			e.printStackTrace();
 		} catch (UnsupportedOperationException e) {
-			logger.error("不支持的请求操作");
+			error = "不支持的请求操作";
 			e.printStackTrace();
 		} catch (ParseException e) {
-			logger.error("解析错误");
+			error = "解析错误";
 			e.printStackTrace();
 		} catch (IOException e) {
-			logger.error("IO错误");
+			error = "IO错误";
 			e.printStackTrace();
 		} finally {
 			if (null != response) {
 				try {
 					response.close();
 				} catch (IOException e) {
-					logger.error("关闭响应连接出错");
+					error = "关闭响应连接出错";
 					e.printStackTrace();
 				}
 			}
-
+			if (!"".equals(error)) {
+				jSONObject.put("success", false);
+				jSONObject.put("error", error);
+				logger.error(error);
+			}
+			return jSONObject.toString();
 		}
-
-		return sb == null ? RESULT : ("".equals(sb.toString().trim()) ? "-1"
-				: sb.toString());
 
 	}
 

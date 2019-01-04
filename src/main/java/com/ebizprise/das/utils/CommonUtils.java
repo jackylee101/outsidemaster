@@ -26,7 +26,7 @@ public class CommonUtils {
 
 	private static final Log LOG = LogFactory.getLog(CommonUtils.class);
 
-	final static public String PRIFIX = "/api/v1";
+	final static public String PRIFIX = "/outsideservant/v1";
 
 	final static public String PRJTABLE = "USER_UPLOAD_DATA";
 	

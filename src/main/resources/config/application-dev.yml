@@ -1,0 +1,15 @@
+baseUrl:
+  engineUrl: http://192.168.128.23:8089/?bid=
+  apiUrl: http://218.210.49.243:8080
+  dbUrl: http://127.0.0.1:8076
+  
+  syncCityList: dev
+  syncCities: 1
+  syncEnable: true
+  syncServer: dev
+  syncUrl1: http://127.0.0.1:8075
+  syncUrl2: http://uatrds.rollingdemand.com.cn
+  syncUrl3: http://192.168.128.23:8080
+  
+scheduledtasks:
+  trigtime: "0/3 * * * * ?"

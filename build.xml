@@ -15,7 +15,7 @@
 <!--                                                                        -->
 <!-- ====================================================================== -->
 
-<project name="das_outsideserv" default="package2" basedir=".">
+<project name="das_outsidemaster" default="package2" basedir=".">
 
 	<!-- ====================================================================== -->
 	<!-- Build environment properties                                           -->
@@ -473,19 +473,19 @@
 	</target>
 
 	<target name="32_move" depends="31_mvn_dev" description="將本地jar包改名">
-		<move file="C:\jsp\das_backend\outsideserv\target/das-outsideserv-1.0-SNAPSHOT.jar" tofile="C:\jsp\das_backend\outsideserv\target/das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" />
+		<move file="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT.jar" tofile="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 	</target>
 
 	<target name="33_sftp_upload_jar_DEV_AP" depends="32_move" description="將jar包用SFTP傳到我們的UAT伺服器">
-		<scp todir="root@192.168.128.23:/opt/jar/das-outsideserv" password="123qweaS" trust="true" verbose="true">
-			<fileset dir="C:\jsp\das_backend\outsideserv\target/">
-				<include name="das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" />
+		<scp todir="root@192.168.128.23:/opt/jar/das-outsidemaster" password="123qweaS" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\target/">
+				<include name="das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>
 	</target>
 
-	<target name="34_ssh_kill_das_outsideserv" depends="">
+	<target name="34_ssh_kill_das_outsidemaster" depends="">
 		<java classname="com.ebizprise.das.utils.SSHUtils" fork="true">
 			<classpath>
 				<pathelement location="./target/classes/" />
@@ -498,26 +498,44 @@
 	</target>
 
 	<target name="35_ssh_mkdir" depends="33_sftp_upload_jar_DEV_AP" description="執行遠端主機上的ssh將mkdir">
-		<sshexec host="192.168.128.23" username="root" password="123qweaS" command="mkdir -p /opt/jar/das-outsideserv/${lastmonthstamp}" trust="true" />
+		<sshexec host="192.168.128.23" username="root" password="123qweaS" command="mkdir -p /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 
 	<target name="36_ssh_mv" depends="35_ssh_mkdir" description="執行遠端主機上的ssh將mv">
-		<sshexec failonerror="false" host="192.168.128.23" username="root" password="123qweaS" command="mv -f /opt/jar/das-outsideserv/das-outsideserv-1.0-SNAPSHOT_${lastmonthstamp}* /opt/jar/das-outsideserv/${lastmonthstamp}" trust="true" />
+		<sshexec failonerror="false" host="192.168.128.23" username="root" password="123qweaS" command="mv -f /opt/jar/das-outsidemaster/das-outsidemaster-0.1-SNAPSHOT_${lastmonthstamp}* /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 
-	<target name="37_ssh_open_das_ap" depends="36_ssh_mv" description="執行遠端主機上的ssh將das_outsideserv打開">
-		<sshexec host="192.168.128.23" username="root" password="123qweaS" command="nohup java -Djava.net.preferIPv4Stack=true -Dspring.config.location=application.yml -jar /opt/jar/das-outsideserv/das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" trust="true" />
+	<target name="37_ssh_open_das_ap" depends="36_ssh_mv" description="執行遠端主機上的ssh將das_outsidemaster打開">
+		<sshexec host="192.168.128.23" username="root" password="123qweaS" command="nohup java -Djava.net.preferIPv4Stack=true -Dspring.config.location=application.yml -jar /opt/jar/das-outsidemaster/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" trust="true" />
 	</target>
 
 	<target name="38_ssh_copy_config_dev" depends="" description="將config用SFTP傳到我們的dev伺服器">
-		<scp todir="root@192.168.128.23:/opt/jar/das-outsideserv" password="123qweaS" trust="true" verbose="true">
-			<fileset dir="C:\jsp\das_backend\outsideserv\src\config\dev">
+		<scp todir="root@192.168.128.23:/opt/jar/das-outsidemaster" password="123qweaS" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\src\config\dev">
 				<include name="*.yml" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>
 	</target>
 
+	<target name="61_mvn_staging" depends="mvn_windows_setup, mvn_unix_setup">
+		<exec dir="${basedir}" executable="${mvn.executable}">
+			<arg line="${mvn.args} 'mvn install -DskipTests=true'" />
+		</exec>
+	</target>
+
+	<target name="62_move" depends="61_mvn_staging" description="將本地jar包改名">
+		<move file="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT.jar" tofile="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
+	</target>
+
+	<target name="63_sftp_upload_jar_UAT_AP" depends="62_move" description="將jar包用SFTP傳到我們的UAT伺服器">
+		<scp todir="root@47.96.229.192:/opt/jar/das-outsidemaster" password="#Ebiz0225462508" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\target/">
+				<include name="das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
+				<!--<include name="**/foo.*"/> -->
+			</fileset>
+		</scp>
+	</target>
 
 	<target name="71_mvn_staging" depends="mvn_windows_setup, mvn_unix_setup">
 		<exec dir="${basedir}" executable="${mvn.executable}">
@@ -526,19 +544,19 @@
 	</target>
 
 	<target name="72_move" depends="71_mvn_staging" description="將本地jar包改名">
-		<move file="C:\jsp\das_backend\outsideserv\target/das-outsideserv-1.0-SNAPSHOT.jar" tofile="C:\jsp\das_backend\outsideserv\target/das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" />
+		<move file="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT.jar" tofile="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 	</target>
 
 	<target name="73_sftp_upload_jar_UAT_AP" depends="72_move" description="將jar包用SFTP傳到我們的UAT伺服器">
-		<scp todir="root@47.96.231.33:/opt/jar/das-outsideserv" password="#Ebiz0225462508" trust="true" verbose="true">
-			<fileset dir="C:\jsp\das_backend\outsideserv\target/">
-				<include name="das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" />
+		<scp todir="root@47.96.231.33:/opt/jar/das-outsidemaster" password="#Ebiz0225462508" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\target/">
+				<include name="das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>
 	</target>
 
-	<target name="74_ssh_kill_das_outsideserv" depends="73_sftp_upload_jar_UAT_AP">
+	<target name="74_ssh_kill_das_outsidemaster" depends="73_sftp_upload_jar_UAT_AP">
 		<java classname="com.ebizprise.das.utils.SSHUtils" fork="true">
 			<classpath>
 				<pathelement location="./target/classes/" />
@@ -550,22 +568,22 @@
 		</java>
 	</target>
 
-	<target name="75_ssh_mkdir" depends="74_ssh_kill_das_outsideserv" description="執行遠端主機上的ssh將mkdir">
-		<sshexec host="47.96.231.33" username="root" password="#Ebiz0225462508" command="mkdir -p /opt/jar/das-outsideserv/${lastmonthstamp}" trust="true" />
+	<target name="75_ssh_mkdir" depends="74_ssh_kill_das_outsidemaster" description="執行遠端主機上的ssh將mkdir">
+		<sshexec host="47.96.231.33" username="root" password="#Ebiz0225462508" command="mkdir -p /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 
 	<target name="76_ssh_mv" depends="75_ssh_mkdir" description="執行遠端主機上的ssh將mv">
-		<sshexec failonerror="false" host="47.96.231.33" username="root" password="#Ebiz0225462508" command="mv -f /opt/jar/das-outsideserv/das-outsideserv-1.0-SNAPSHOT_${lastmonthstamp}* /opt/jar/das-outsideserv/${lastmonthstamp}" trust="true" />
+		<sshexec failonerror="false" host="47.96.231.33" username="root" password="#Ebiz0225462508" command="mv -f /opt/jar/das-outsidemaster/das-outsidemaster-0.1-SNAPSHOT_${lastmonthstamp}* /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 
-	<target name="77_ssh_open_das_ap" depends="76_ssh_mv" description="執行遠端主機上的ssh將das_outsideserv打開">
-		<sshexec host="47.96.231.33" username="root" password="#Ebiz0225462508" command="nohup java -Xmx2048m -Xms512m -Djava.net.preferIPv4Stack=true -jar /opt/jar/das-outsideserv/das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" trust="true" />
+	<target name="77_ssh_open_das_ap" depends="76_ssh_mv" description="執行遠端主機上的ssh將das_outsidemaster打開">
+		<sshexec host="47.96.231.33" username="root" password="#Ebiz0225462508" command="nohup java -Xmx2048m -Xms512m -Djava.net.preferIPv4Stack=true -jar /opt/jar/das-outsidemaster/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" trust="true" />
 	</target>
 
 
 	<target name="78_ssh_copy_config_staging" depends="" description="將config用SFTP傳到我們的dev伺服器">
-		<scp todir="root@47.96.231.33:/opt/jar/das-outsideserv" password="#Ebiz0225462508" trust="true" verbose="true">
-			<fileset dir="C:\jsp\das_backend\outsideserv\src\config\staging">
+		<scp todir="root@47.96.231.33:/opt/jar/das-outsidemaster" password="#Ebiz0225462508" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\src\config\staging">
 				<include name="*.yml" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
@@ -579,19 +597,19 @@
 	</target>
 
 	<target name="92_move" depends="91_mvn_staging" description="將本地jar包改名">
-		<move file="C:\jsp\das_backend\outsideserv\target/das-outsideserv-1.0-SNAPSHOT.jar" tofile="C:\jsp\das_backend\outsideserv\target/das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" />
+		<move file="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT.jar" tofile="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 	</target>
 
 	<target name="93_sftp_upload_jar_UAT_AP" depends="92_move" description="將jar包用SFTP傳到我們的UAT伺服器">
-		<scp todir="root@47.98.129.134:/opt/jar/das-outsideserv" password="#Ebiz0225462508" trust="true" verbose="true">
-			<fileset dir="C:\jsp\das_backend\outsideserv\target/">
-				<include name="das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" />
+		<scp todir="root@47.98.129.134:/opt/jar/das-outsidemaster" password="#Ebiz0225462508" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\target/">
+				<include name="das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>
 	</target>
 
-	<target name="94_ssh_kill_das_outsideserv" depends="93_sftp_upload_jar_UAT_AP">
+	<target name="94_ssh_kill_das_outsidemaster" depends="93_sftp_upload_jar_UAT_AP">
 		<java classname="com.ebizprise.das.utils.SSHUtils" fork="true">
 			<classpath>
 				<pathelement location="./target/classes/" />
@@ -603,21 +621,21 @@
 		</java>
 	</target>
 
-	<target name="95_ssh_mkdir" depends="94_ssh_kill_das_outsideserv" description="執行遠端主機上的ssh將mkdir">
-		<sshexec host="47.98.129.134" username="root" password="#Ebiz0225462508" command="mkdir -p /opt/jar/das-outsideserv/${lastmonthstamp}" trust="true" />
+	<target name="95_ssh_mkdir" depends="94_ssh_kill_das_outsidemaster" description="執行遠端主機上的ssh將mkdir">
+		<sshexec host="47.98.129.134" username="root" password="#Ebiz0225462508" command="mkdir -p /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 
 	<target name="96_ssh_mv" depends="95_ssh_mkdir" description="執行遠端主機上的ssh將mv">
-		<sshexec failonerror="false" host="47.98.129.134" username="root" password="#Ebiz0225462508" command="mv -f /opt/jar/das-outsideserv/das-outsideserv-1.0-SNAPSHOT_${lastmonthstamp}* /opt/jar/das-outsideserv/${lastmonthstamp}" trust="true" />
+		<sshexec failonerror="false" host="47.98.129.134" username="root" password="#Ebiz0225462508" command="mv -f /opt/jar/das-outsidemaster/das-outsidemaster-0.1-SNAPSHOT_${lastmonthstamp}* /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 
-	<target name="97_ssh_open_das_ap" depends="96_ssh_mv" description="執行遠端主機上的ssh將das_outsideserv打開">
-		<sshexec host="47.98.129.134" username="root" password="#Ebiz0225462508" command="nohup java -Xmx2048m -Xms512m -Djava.net.preferIPv4Stack=true -jar /opt/jar/das-outsideserv/das-outsideserv-1.0-SNAPSHOT_${nowstamp}.jar" trust="true" />
+	<target name="97_ssh_open_das_ap" depends="96_ssh_mv" description="執行遠端主機上的ssh將das_outsidemaster打開">
+		<sshexec host="47.98.129.134" username="root" password="#Ebiz0225462508" command="nohup java -Xmx2048m -Xms512m -Djava.net.preferIPv4Stack=true -jar /opt/jar/das-outsidemaster/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" trust="true" />
 	</target>
 
 	<target name="98_ssh_copy_config_staging" depends="" description="將config用SFTP傳到我們的dev伺服器">
-		<scp todir="root@47.98.129.134:/opt/jar/das-outsideserv" password="#Ebiz0225462508" trust="true" verbose="true">
-			<fileset dir="C:\jsp\das_backend\outsideserv\src\config\prod">
+		<scp todir="root@47.98.129.134:/opt/jar/das-outsidemaster" password="#Ebiz0225462508" trust="true" verbose="true">
+			<fileset dir="C:\jsp4\outsidemaster\src\config\prod">
 				<include name="*.yml" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>

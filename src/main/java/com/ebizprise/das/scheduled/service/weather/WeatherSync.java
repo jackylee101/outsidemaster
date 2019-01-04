@@ -16,6 +16,6 @@ public interface WeatherSync {
 
 	void takeWeatherDate2DB(String etlDate, String env);
 
-	List takeWeatherDate2DBtest(String syncServer);
+	List takeWeatherDate2DBtest(String etlDate, String env);
 
 }

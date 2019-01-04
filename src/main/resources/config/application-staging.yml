@@ -1,0 +1,15 @@
+baseUrl:
+  engineUrl: http://127.0.0.1:8089/?bid=
+  apiUrl: http://uatrds.rollingdemand.com.cn
+  dbUrl: http://172.16.116.83:8076
+  
+  syncCityList: staging
+  syncCities: 1
+  syncEnable: yes
+  syncServer: staging,dev
+  syncUrl1: http://127.0.0.1:8075
+  syncUrl2: http://uatrds.rollingdemand.com.cn
+  syncUrl3: http://test.uatrds.rollingdemand.cn:8080
+  
+scheduledtasks:
+  trigtime: "0 30 22 * * ?"

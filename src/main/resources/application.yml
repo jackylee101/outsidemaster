@@ -1,6 +1,8 @@
 #激活哪一个环境的配置文件
 #公共配置
 spring:
+  profiles:
+    active: staging
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   application:
@@ -105,19 +107,3 @@ fastjson:
 #  client:
 #    serviceUrl:
 #      defaultZone: http://localhost:8761/eureka/
-
-baseUrl:
-  engineUrl: http://192.168.128.23:8089/?bid=
-  apiUrl: http://218.210.49.243:8080
-  dbUrl: http://127.0.0.1:8076
-  
-  syncCityList: dev
-  syncCities: 1
-  syncEnable: true
-  syncServer: dev
-  syncUrl1: http://127.0.0.1:8075
-  syncUrl2: http://127.0.0.1:8075
-  syncUrl3: http://127.0.0.1:8095
-  
-scheduledtasks:
-  trigtime: "0/3 * 11 11 * ?"

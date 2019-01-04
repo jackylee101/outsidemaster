@@ -30,7 +30,7 @@ import com.ebizprise.das.scheduled.service.weather.WeatherSync;
 import com.ebizprise.das.scheduled.service.weather.impl.WeatherSyncImpl;
 import com.ebizprise.das.utils.CommonUtils;
 import com.ebizprise.das.utils.DateUtil;
-import com.ebizprise.das.utils.HttpUtils;
+//import com.ebizprise.das.utils.HttpUtils;
 import com.ebizprise.das.utilsweb.common.CodeUtilsCommon;
 
 //import com.ebizprise.das.web.service.WeatherService;
@@ -49,8 +49,7 @@ public class WeatherSyncTest extends WeatherSyncImpl {
 	@Test
 	public void testGetFirstDateAndLastDateByMonth() {
 		String apiUrl = "http://192.168.128.23:8075";
-		if (!obtainCityIds(apiUrl))
-			return;
+		List list=obtainCityIds(apiUrl);
 		// Assert.assertEquals(defaultFirstDate,
 		// firstDateAndLastDateByMonth.getFirstDate());
 		// Assert.assertEquals(defaultLastDate,
