@@ -1,10 +1,22 @@
+appname: outsidemaster_dev
+
+# change
+project-config:
+  # eureka
+  discovery:
+    url: 47.96.231.33
+  # admin
+  mgmt:
+    url: 47.96.231.33
+    prefix: /mgmt/api/v2
+    
 baseUrl:
   engineUrl: http://192.168.128.23:8089/?bid=
   apiUrl: http://218.210.49.243:8080
   dbUrl: http://127.0.0.1:8076
   
   syncCityList: dev
-  syncCities: 1
+  syncCities: 5
   syncEnable: true
   syncServer: dev
   syncUrl1: http://127.0.0.1:8075

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.ebizprise.das.db.model.MyMap;
 import com.ebizprise.das.db.repository.RedisRepository;
 
-@Repository
+//@Repository
 public class RedisRepositoryImpl implements RedisRepository {
 	// private static final String KEY = "Movie";
 

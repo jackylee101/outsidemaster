@@ -1,0 +1,3 @@
+# 自定义logback变量
+CHARSET: UTF-8
+PATTERN: %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n

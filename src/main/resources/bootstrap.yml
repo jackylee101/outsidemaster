@@ -1,15 +1,9 @@
 spring:
-  application:
-    name: das-outsideserv
   cloud:
     config:
       uri: ${CONFIG_SERVER_URL:http://localhost:8891}
 #      uri: ${CONFIG_SERVER_URI:${vcap.services.${PREFIX:}configserver.credentials.uri:http://user:password@localhost:8888}}
 
-#management:
-#  security:
-#    enabled: false
-    
 eureka:
   instance:
     leaseRenewalIntervalInSeconds: 1  #心跳间隔时间1s (for Dev)

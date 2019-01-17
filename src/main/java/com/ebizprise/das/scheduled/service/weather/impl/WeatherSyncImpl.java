@@ -121,6 +121,7 @@ public class WeatherSyncImpl implements WeatherSync {
 	/**
 	 * 天氣資料同步作業--主入口兼手動驅動入口
 	 */
+
 	public void takeWeatherDate2DB(String etlDate, String syncServer) {
 		if (etlDate == null)
 			etlDate = DateUtil.acquireEtlDate(0);
@@ -809,7 +810,6 @@ public class WeatherSyncImpl implements WeatherSync {
 					logger.error(etlDate + "沒有" + areaid);
 					continue;
 				}
-
 			} catch (JSONException ex) {
 				ex.printStackTrace();
 				return false;

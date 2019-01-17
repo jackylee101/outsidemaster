@@ -9,7 +9,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "DailyWeather")
+@Table(name = "DAILY_WEATHER")
 public class DailyWeather implements Serializable {
 	private static final long serialVersionUID = 1L;
 

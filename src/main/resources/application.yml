@@ -1,18 +1,24 @@
+server:
+  servlet:
+    context-path: /outsidemaster/api
+  port: 8094
+  tomcat:
+    uri-encoding: UTF-8
 #激活哪一个环境的配置文件
 #公共配置
 spring:
   profiles:
-    active: staging
+    active: prod
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   application:
-    name: outsidemaster
+    name: ${appname}
 
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+
 # jdbc_config datasource
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -27,13 +33,13 @@ spring:
       initial-size: 3
       max-active: 100
       min-idle: 10
-      time-between-eviction-runs-millis: 30000
-      remove-abandoned: true
-      remove-abandoned-timeout: 60
+      time-between-eviction-runs-millis: 60000
+#      remove-abandoned: true
+#      remove-abandoned-timeout: 60000
       suspect-timeout: 60
       log-abandoned: false
       abandon-when-percentage-full: 50
-      min-evictable-idle-time-millis: 60000
+      min-evictable-idle-time-millis: 300000
       testOnBorrow: true
       testWhileIdle: true
       testOnReturn: false
@@ -48,7 +54,7 @@ spring:
     # 合并多个DruidDataSource的监控数据
       useGlobalDataSourceStat: true
       
-      aop-patterns: com.ebizprise.das.web.controller.v1.*
+      aop-patterns: com.ebizprise.das.scheduled.service.weather.*
     # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙，此处是filter修改的地方
       filters: stat,wall,slf4j
     # 配置WebStatFilter
@@ -64,23 +70,21 @@ spring:
     # 配置DruidStatViewServlet
       stat-view-servlet:
         url-pattern: "/druid/*"
-        
-server:
-  servlet:
-    context-path: /${spring.application.name}/api
-  port: 8094
-  tomcat:
-    uri-encoding: UTF-8
-  
+
+  boot:
+    admin:
+      context-path: /
+      client:
+        url: http://${project-config.mgmt.url}${project-config.mgmt.prefix}
+        username: adminMgmt
+        password: adminMgmtPwd
+        instance:
+          metadata:
+            management.context-path: /
+              
 info:
   desciption: DAS web
   component: Web Server
-
-management:
-#  port: 8081
-#  context-path: /manage
-  security:
-    enabled: false
 
 recmdapi:
   recmdCustProdList: http://127.0.0.1:8092/recmd/api/v1/recmdCustProdList/
@@ -99,7 +103,6 @@ weather:
   LOW_TEMPERATURE: LOW_TEMPERATURE
   WEATHER_CONDITION: WEATHER_CONDITION
 
-
 fastjson:
 # 使用默认属性首字母
   compatibleWithJavaBean: true
@@ -107,3 +110,22 @@ fastjson:
 #  client:
 #    serviceUrl:
 #      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  # logback入口文件
+  config: classpath:logback-spring.xml
+  # 文件放置文件夹
+  path: /mnt/vdb1/logs/${spring.application.name}
+  
+# 开放服务器信息给admin
+management:
+  security:
+    enabled: false  
+  context-path: 
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS

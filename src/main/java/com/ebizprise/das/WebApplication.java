@@ -2,6 +2,8 @@ package com.ebizprise.das;
 
 import java.util.concurrent.Executor;
 
+import javax.persistence.EntityManagerFactory;
+
 //import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 //import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -29,15 +32,13 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @SpringBootApplication
 // @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class,
 // HibernateJpaAutoConfiguration.class })
-//@EnableScheduling
+// @EnableScheduling
 // @EnableConfigurationProperties(StorageProperties.class)
 @EnableAutoConfiguration
 // @MapperScan(basePackages = "com.ebizprise.das.db.dao")
-@EntityScan(basePackages = "com.ebizprise.das.db.entity")
-@EnableJpaRepositories(basePackages = "com.ebizprise.das.db.repository")
 // @EnableEurekaServer
 // @EnableAsync
-public class WebApplication extends SpringBootServletInitializer  {
+public class WebApplication extends SpringBootServletInitializer {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(WebApplication.class);
@@ -45,7 +46,8 @@ public class WebApplication extends SpringBootServletInitializer  {
 	private AutowireCapableBeanFactory beanFactory;
 
 	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+	protected SpringApplicationBuilder configure(
+			SpringApplicationBuilder application) {
 		return application.sources(WebApplication.class);
 	}
 
@@ -121,42 +123,32 @@ public class WebApplication extends SpringBootServletInitializer  {
 		return lci;
 	}
 
-//	@Override
-//	public void addInterceptors(InterceptorRegistry registry) {
-//		if (logger.isDebugEnabled()) {
-//			logger.debug("entering addInterceptors(InterceptorRegistry)");
-//			logger.debug("registry: " + registry);
-//		}
-//		registry.addInterceptor(localeChangeInterceptor());
-//		if (logger.isDebugEnabled()) {
-//			logger.debug("exiting addInterceptors()");
-//		}
-//	}
-//
-//	@Override
-//	public void addCorsMappings(CorsRegistry registry) {
-//		if (logger.isDebugEnabled()) {
-//			logger.debug("entering addCorsMappings(CorsRegistry)");
-//			logger.debug("registry: " + registry);
-//		}
-//		registry.addMapping("/**").allowedOrigins("*").allowedMethods("*")
-//				.allowCredentials(false).maxAge(3600);
-//		if (logger.isDebugEnabled()) {
-//			logger.debug("exiting addCorsMappings()");
-//		}
-//
-//	}
-
-	// @Bean
-	// public PlatformTransactionManager transactionManager(
-	// EntityManagerFactory emf) {
-	//
-	// logger.warn("資料庫連線: " + jdbc_url);
-	// logger.warn("API連線: " + apiUrl);
-	//
-	// JpaTransactionManager transactionManager = new JpaTransactionManager();
-	// transactionManager.setEntityManagerFactory(emf);
-	// return transactionManager;
+	// @Override
+	// public void addInterceptors(InterceptorRegistry registry) {
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("entering addInterceptors(InterceptorRegistry)");
+	// logger.debug("registry: " + registry);
 	// }
+	// registry.addInterceptor(localeChangeInterceptor());
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("exiting addInterceptors()");
+	// }
+	// }
+	//
+	// @Override
+	// public void addCorsMappings(CorsRegistry registry) {
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("entering addCorsMappings(CorsRegistry)");
+	// logger.debug("registry: " + registry);
+	// }
+	// registry.addMapping("/**").allowedOrigins("*").allowedMethods("*")
+	// .allowCredentials(false).maxAge(3600);
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("exiting addCorsMappings()");
+	// }
+	//
+	// }
+
+
 
 }

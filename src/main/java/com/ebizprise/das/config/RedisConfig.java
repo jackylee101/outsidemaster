@@ -9,7 +9,7 @@ import org.springframework.data.redis.serializer.GenericToStringSerializer;
 
 import redis.clients.jedis.JedisPoolConfig;
 
-@Configuration
+//@Configuration
 // @ComponentScan("com.michaelcgood")
 public class RedisConfig {
 

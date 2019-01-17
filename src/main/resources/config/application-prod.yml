@@ -1,3 +1,15 @@
+appname: outsidemaster_prod
+
+# change
+project-config:
+  # eureka
+  discovery:
+    url: 47.96.231.33
+  # admin
+  mgmt:
+    url: 172.16.76.239
+    prefix: /mgmt/api/v2
+    
 baseUrl:
   engineUrl: http://172.16.116.77:8089/?bid=
   apiUrl: https://rds.rollingdemand.com.cn
@@ -5,11 +17,12 @@ baseUrl:
   
   syncCityList: prod
   syncCities: 65534
-  syncEnable: false
-  syncServer: prod
+  syncEnable: true
+  syncServer: prod,staging,dev
   syncUrl1: http://rds.rollingdemand.com.cn
   syncUrl2: http://uatrds.rollingdemand.com.cn
   syncUrl3: http://test.uatrds.rollingdemand.cn:8080
   
 scheduledtasks:
   trigtime: "0 30 22 * * ?"
+  

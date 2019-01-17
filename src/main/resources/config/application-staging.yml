@@ -1,3 +1,15 @@
+appname: outsidemaster_staging
+
+# change
+project-config:
+  # eureka
+  discovery:
+    url: 47.96.231.33
+  # admin
+  mgmt:
+    url: 172.16.76.239
+    prefix: /mgmt/api/v2
+    
 baseUrl:
   engineUrl: http://127.0.0.1:8089/?bid=
   apiUrl: http://uatrds.rollingdemand.com.cn

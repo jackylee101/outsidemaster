@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="false">
+
+    <!-- logback中使用自定义变量 -->
+    <property resource="log/logbackproperty.yml"/>
+
+    <!-- 使用bootstrap.yml配置appname -->
+    <springProperty scope="context" name="appname" source="spring.application.name" defaultValue="test"/>
+    <!-- LOG_PATH变量在bootstrap中配置，即logging.path -->
+
+    <!-- 基础配置 -->
+    <include resource="log/logback-base.xml"/>
+
+    <!-- database配置 -->
+    <include resource="log/logback-database.xml"/>
+
+    <root level="INFO" additivity="true">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ROLLINGFILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+</configuration>
