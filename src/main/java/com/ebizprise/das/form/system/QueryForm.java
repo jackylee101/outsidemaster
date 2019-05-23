@@ -21,5 +21,10 @@ public class QueryForm extends StatusForm {
 		this.errCode = errCode;
 	}
 
+	public String getQueryString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

@@ -22,8 +22,7 @@ public class DateUtil {
 
 	protected static Map<String, String> keywords = new HashMap<String, String>();
 
-	private static SimpleDateFormat outputFormat = new SimpleDateFormat(
-			"yyyyMMdd");
+	private static SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd");
 
 	static {
 		ymdPatterns.put("\\d{4}/\\d{2}/\\d{2}", "yyyy/MM/dd");
@@ -126,8 +125,30 @@ public class DateUtil {
 		return newText;
 	}
 
-	protected static Object[] isMatch(Map<String, String> patterns, String txt)
-			throws Exception {
+	public static Long sDate2Number(String txt, String pattern) {
+		Long ll = new Long(0);
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+			Date date = formatter.parse(txt);
+			ll = date.getTime();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return ll;
+	}
+
+	public static Date str2Date(String txt, String pattern) {
+		Date dt = new Date();
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+			dt = formatter.parse(txt);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return dt;
+	}
+
+	protected static Object[] isMatch(Map<String, String> patterns, String txt) throws Exception {
 		for (String key : patterns.keySet()) {
 			if (isMatch(key, txt)) {
 				String format = patterns.get(key);
@@ -159,6 +180,28 @@ public class DateUtil {
 	protected static boolean isMatch(String pattern, String txt) {
 		Matcher m = Pattern.compile(pattern).matcher(txt);
 		return m.matches();
+	}
+
+	public static boolean Less(Date dIdx, Date dTo) {
+		return dIdx.getTime() < dTo.getTime();
+	}
+
+	public static boolean Equ(Date dIdx, Date dTo) {
+		return dIdx.getTime() == dTo.getTime();
+	}
+
+	public static Date add(Date dIdx, int adv) {
+		Calendar cal = Calendar.getInstance();// 使用預設時區和語言環境獲得一個日曆。
+		cal.setTimeInMillis(dIdx.getTime());
+		cal.add(Calendar.DAY_OF_MONTH, adv);// 取當前日期的修正.
+		Date dt = cal.getTime();
+		return dt;
+	}
+
+	public static String date2str(Date dIdx, String pattern) {
+		SimpleDateFormat outputFormat = new SimpleDateFormat(pattern);
+		String newText = outputFormat.format(dIdx.getTime());
+		return newText;
 	}
 
 }

@@ -24,7 +24,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       driver-class-name: org.h2.Driver
-      url: "jdbc:h2:file:~/tmp/outsidemaster"
+      url: "jdbc:h2:file:/tmp/outsidemaster"
       username: sa
       password: sa
     
@@ -115,7 +115,7 @@ logging:
   # logback入口文件
   config: classpath:logback-spring.xml
   # 文件放置文件夹
-  path: /mnt/vdb1/logs/${spring.application.name}
+  path: /tmp/vdb1/logs/${spring.application.name}
   
 # 开放服务器信息给admin
 management:

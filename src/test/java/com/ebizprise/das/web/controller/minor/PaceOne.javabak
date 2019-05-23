@@ -1,0 +1,112 @@
+package com.ebizprise.das.web.controller.minor;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+//import com.ebizprise.das.auth.dao.UserInfoMapper;
+//import com.ebizprise.das.form.eventAnalysis.OutsideEventEffOutputForm;
+//import com.ebizprise.das.form.eventAnalysis.OutsideEventEffOutputFormList;
+//import com.ebizprise.das.form.eventAnalysis.OutsideEventOutputFormList;
+//import com.ebizprise.das.form.eventAnalysis.OutsideEventOutputList;
+//import com.ebizprise.das.form.projectAnalysis.A14OrgDataForm;
+//import com.ebizprise.das.form.projectAnalysis.AFourOrgData2Form;
+import com.ebizprise.das.utils.CommonUtils;
+
+@Component
+public class PaceOne extends PaceDefault {
+
+	private static final Log logger = LogFactory.getLog(PaceOne.class);
+
+	@Autowired
+	protected ForecastOneParameter forecastOneParameter;
+
+//	@Autowired
+//	protected UserInfoMapper userInfoMapper;
+
+	@PersistenceUnit
+	// (unitName = "EntityManagerFactory")
+	private EntityManagerFactory emFactory;
+
+	public PaceOne() {
+		super();
+	}
+
+	/**
+	 * 表單自動化測試 -- 單品項預測 Step4_1: 查出該批次預測的品項清單
+	 */
+	
+
+	/**
+	 * 表單自動化測試 -- 單品項預測 Step4_2: 取得單一品項可選擇的 外部事件列表
+	 * 
+	 * @param firstSku
+	 */
+	public List pace42(String custId, String prjItmId, String prjDtlId,
+			Map<String, Object> firstSku) {
+		String url = CommonUtils.PRIFIX + "/outEvtList/";
+
+		Map<String, Object> params = new HashMap();
+		params.put("custId", custId);
+		params.put("prjItmId", prjItmId);
+		params.put("prjDtlId", prjDtlId);
+		params.putAll(firstSku);
+
+		ResponseEntity<String> response = paceType(url, HttpMethod.PUT, params);
+		// 輸出結果
+		logger.info(response.getBody());
+		List detail = JSON.parseObject(response.getBody(), List.class);
+
+		return detail;
+	}
+
+	/**
+	 * 表單自動化測試 -- 單品項預測 Step4_3: 針對單一品項及選定外部事件(0~N個)進行試算影響量
+	 * 
+	 * @param paraSetList
+	 */
+//	public OutsideEventEffOutputFormList pace43(String custId, String prjItmId,
+//			String prjDtlId, List paraSetList) {
+//		String url = CommonUtils.PRIFIX + "/outEvtSet/";
+//
+//		Map<String, Object> params = new HashMap();
+//		params.put("custId", custId);
+//		params.put("prjItmId", prjItmId);
+//		params.put("prjDtlId", prjDtlId);
+//		params.put("a01", "CIB");
+//		params.put("a02", "");
+//		params.put("a03", "");
+//		params.put("a04", "");
+//		params.put("paraSet", paraSetList);
+//
+//		ResponseEntity<String> response = paceType(url, HttpMethod.PUT, params);
+//		// 輸出結果
+//		logger.info(response.getBody());
+//		OutsideEventEffOutputFormList detail = JSON.parseObject(
+//				response.getBody(), OutsideEventEffOutputFormList.class);
+//
+//		return detail;
+//	}
+
+	
+
+	
+
+	
+
+	
+}
