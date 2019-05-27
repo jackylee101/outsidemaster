@@ -1,16 +1,20 @@
 package com.ebizprise.das.web.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.thymeleaf.util.StringUtils;
 
 import com.ebizprise.das.RootNGTest;
 import com.ebizprise.das.form.base.DvdForm2;
@@ -18,6 +22,9 @@ import com.ebizprise.das.form.base.PriceForm2;
 import com.ebizprise.das.form.base.PriveAuthForm;
 import com.ebizprise.das.form.base.ProductForm;
 import com.ebizprise.das.form.system.QueryForm;
+import com.ebizprise.das.pojo.ModelPortfolio;
+import com.ebizprise.das.pojo.Portfolio;
+import com.ebizprise.das.utils.DateUtil;
 import com.ebizprise.das.web.controller.minor.FPUtil;
 import com.ebizprise.das.web.controller.minor.PaceDefault;
 import com.ebizprise.das.web.controller.minor.PaceStyle;
@@ -83,6 +90,84 @@ public class ForecastControllerNGTest extends RootNGTest {
 //		logger.warn(n);
 //		pace1(user1[n][0], user1[n][1]);
 //	}
+
+	public void paceE0A(String username, String password) {
+		String path = "/tmp/Fubon Nano#1 ETF NAV Calculator (for 20190514 go-live) Jacky.xlsx";
+		ExcelPOIXml ep = new ExcelPOIXml();
+		XSSFWorkbook workbook = ep.loadExcel(path);
+		String sheetName = "MPs";
+		List list = ep.readExcel(workbook, sheetName);
+		String targetDate = "2019-05-23";
+
+		ModelPortfolio E1T = prepareModel(targetDate, "E1T", list, 1, 5, 19);
+		ModelPortfolio E2T = prepareModel(targetDate, "E2T", list, 22, 25, 40);
+		ModelPortfolio E3T = prepareModel(targetDate, "E3T", list, 43, 46, 63);
+		ModelPortfolio E4T = prepareModel(targetDate, "E4T", list, 66, 69, 83);
+
+		pace9_2(username, password, targetDate, E1T, path);
+		pace9_2(username, password, targetDate, E2T, path);
+		pace9_2(username, password, targetDate, E3T, path);
+		pace9_2(username, password, targetDate, E4T, path);
+
+		showCurrencyNav(E1T);
+		showCurrencyNav(E2T);
+		showCurrencyNav(E3T);
+		showCurrencyNav(E4T);
+	}
+
+	private ModelPortfolio prepareModel(String targetDate, String modelName, List list, int navRow, int startrow,
+			int endrow) {
+		List list1 = (List) list.get(navRow);
+		String navS = (String) list1.get(1);
+		BigDecimal nav = new BigDecimal(navS);
+		ModelPortfolio mp = new ModelPortfolio(targetDate, modelName, nav);
+		prepareModelPortfolio(mp, list, startrow, endrow);
+		verify(mp);
+		return mp;
+	}
+
+	private void prepareModelPortfolio(ModelPortfolio mp, List list, int startrow, int endrow) {
+
+		for (int i = startrow; i <= endrow; i++) {
+			List list1 = (List) list.get(i);
+			String name = (String) list1.get(0);
+			String isin = (String) list1.get(1);
+			String ccy = (String) list1.get(2);
+			String weightS = (String) list1.get(3);
+			String priceS = (String) list1.get(5);
+			String unitS = (String) list1.get(6);
+
+			BigDecimal weight = new BigDecimal(weightS);
+			BigDecimal price = new BigDecimal(priceS);
+			BigDecimal unit = new BigDecimal(unitS);
+
+			verify(mp.getNav(), weight, price, unit);
+
+			Portfolio po = new Portfolio(name, isin, ccy, weight, price, unit);
+			mp.addPortfolio(po);
+		}
+
+	}
+
+	private void verify(ModelPortfolio mp) {
+		List<Portfolio> portfolioList = mp.getPortfolioList();
+		BigDecimal allWeight = new BigDecimal(0);
+		for (int i = 0; i < portfolioList.size(); i++) {
+			Portfolio po = portfolioList.get(i);
+			allWeight = allWeight.add(po.getWeight());
+		}
+		int ret3 = allWeight.compareTo(new BigDecimal(1));
+		if (ret3 != 0)
+			logger.error("weight有誤");
+	}
+
+	private void verify(BigDecimal nav, BigDecimal weight, BigDecimal price, BigDecimal unit) {
+		BigDecimal ret1 = nav.multiply(weight);
+		BigDecimal ret2 = ret1.divide(price, 8, BigDecimal.ROUND_HALF_UP);
+		int ret3 = ret2.compareTo(unit);
+		if (ret3 != 0)
+			logger.error("unit有誤");
+	}
 
 	/**
 	 * 表單自動化測試 -- 全品項預測
@@ -210,7 +295,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00BSKRJZ44");
 		schemaList.add("IE00B2NPKV68");
 		schemaList.add("IE00BCRY5Y77");
-		
+
 		pace9_1(username, password, schemaList, path);
 	}
 
@@ -389,6 +474,77 @@ public class ForecastControllerNGTest extends RootNGTest {
 
 	}
 
+	private void pace9_2(String username, String password, String targetDate, ModelPortfolio E9T, String path) {
+		PriveAuthForm priveAuthForm = paceDefault.pace11(username, password);
+		String access_token = priveAuthForm.getAccess_token();
+		String token_type = priveAuthForm.getToken_type();
+		Assert.assertNotNull(token_type);
+		Assert.assertNotNull(access_token);
+
+		List<Portfolio> portfolioList = E9T.getPortfolioList();
+
+		String token = token_type + " " + access_token;
+
+		Date tDate = DateUtil.str2Date(targetDate, "yyyy-MM-dd");
+		Date eDate = DateUtil.add(tDate, 1);
+		String to = DateUtil.date2str(eDate, "yyyy-MM-dd");
+
+		for (int i = 0; i < portfolioList.size(); i++) {
+			Portfolio portfolio = portfolioList.get(i);
+			Map mp1 = new HashMap();
+			mp1.put("scheme", "ISIN");
+			mp1.put("value", portfolio.getIsin());
+			mp1.put("currency", "USD");
+
+			List queryList = new ArrayList();
+			queryList.add(mp1);
+			List<ProductForm> productFormList = paceDefault.pace12(token, queryList);
+
+			if (productFormList.size() != 1) {
+				logger.error("沒asset ID");
+			} else {
+				ProductForm productForm = productFormList.get(0);
+				String assetId = productForm.getAssetId();
+				portfolio.setAssetId(assetId);
+
+				List priceList = paceDefault.pace13(token, assetId, "2019-05-14", to);
+				PriceForm2 priceForm = (PriceForm2) priceList.get(0);
+				BigDecimal closePx = takePrice(priceList, targetDate);
+//				logger.info(priceForm.getLocalDate() + " : " + priceForm.getClosePx());
+//				BigDecimal closePx = new BigDecimal(priceForm.getClosePx());
+				portfolio.setClosePx(closePx);
+				portfolio.setLocalDate(priceForm.getLocalDate());
+
+				List dvdList = paceDefault.pace14(token, assetId, "2019-05-14", to);
+				BigDecimal dvd = takeDvd(dvdList, targetDate);
+				portfolio.setDvd(dvd);
+			}
+		}
+
+	}
+
+	private BigDecimal takePrice(List priceList, String from) {
+		String targetDate = StringUtils.replace(from, "-", "");
+		for (int i = 0; i < priceList.size(); i++) {
+			PriceForm2 priceForm2 = (PriceForm2) priceList.get(i);
+			if (targetDate.equals(priceForm2.getLocalDate())) {
+				if (priceForm2.getClosePx() == null)
+					return new BigDecimal(0);
+				BigDecimal price = new BigDecimal(priceForm2.getClosePx());
+				return price;
+			}
+		}
+		logger.error("price沒有涵蓋到");
+		return new BigDecimal(0);
+	}
+
+	private void showCurrencyNav(ModelPortfolio E9T) {
+		BigDecimal nav = E9T.calcNav();
+		BigDecimal b = nav.setScale(6, BigDecimal.ROUND_HALF_UP);
+		logger.info(E9T.getModelName() + "  " + E9T.getTargetDate() + "  " + b);
+
+	}
+
 	/**
 	 * 表單自動化測試 -- 全品項預測 Step0_1: 共同部份,每個交易前5步驟都會一樣
 	 */
@@ -464,6 +620,21 @@ public class ForecastControllerNGTest extends RootNGTest {
 			ep.outExcelposition(priceForm.getClosePx(), sheetName2, i + 1, field * 2 - 1, path);
 			ep.outExcelposition(priceForm.getLocalDate(), sheetName2, i + 1, 0, path);
 		}
+	}
+
+	private BigDecimal takeDvd(List dvdList, String from) {
+		String targetDate = StringUtils.replace(from, "-", "");
+		for (int i = 0; i < dvdList.size(); i++) {
+			DvdForm2 dvdForm2 = (DvdForm2) dvdList.get(i);
+			if (targetDate.equals(dvdForm2.getExDate())) {
+				if (dvdForm2.getValue() == null)
+					return new BigDecimal(0);
+				BigDecimal dvd = new BigDecimal(dvdForm2.getValue());
+				return dvd;
+			}
+		}
+		logger.error("dvd沒有涵蓋到");
+		return new BigDecimal(0);
 	}
 
 	private void showDvd(List dvdList, ExcelPOIXml ep, String sheetName3, String path, int field) {
