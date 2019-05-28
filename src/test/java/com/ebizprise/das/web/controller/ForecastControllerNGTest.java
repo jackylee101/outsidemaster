@@ -174,7 +174,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 	 * 
 	 * TEST2.xlsx 屬於 Type1型的預測資料檔
 	 */
-	public void paceE0T(String username, String password) {
+	public void paceE0T(String username, String password, String from, String to) {
 //		PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
 //		username = "jacky.lee@ebizprise.com";
 //		username = "pkpkpk";
@@ -199,11 +199,11 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE0032077012");
 		schemaList.add("LU1407889887");
 
-		pace9_1(username, password, schemaList, path);
+		pace9_1(username, password, from, to, schemaList, path);
 //		pace0_3(paceStyle);
 	}
 
-	public void paceE1T(String username, String password) {
+	public void paceE1T(String username, String password, String from, String to) {
 //		PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
 //		username = "jacky.lee@ebizprise.com";
 //		username = "pkpkpk";
@@ -225,11 +225,11 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00BCRY6227");
 		schemaList.add("IE00BCRY5Y77");
 
-		pace9_1(username, password, schemaList, path);
+		pace9_1(username, password, from, to, schemaList, path);
 //		pace0_3(paceStyle);
 	}
 
-	public void paceE2T(String username, String password) {
+	public void paceE2T(String username, String password, String from, String to) {
 		String path = "/tmp/E2T.xlsx";
 
 		List<String> schemaList = new ArrayList();
@@ -249,10 +249,10 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00BCRY6227");
 		schemaList.add("IE00BCRY5Y77");
 
-		pace9_1(username, password, schemaList, path);
+		pace9_1(username, password, from, to, schemaList, path);
 	}
 
-	public void paceE3T(String username, String password) {
+	public void paceE3T(String username, String password, String from, String to) {
 		String path = "/tmp/E3T.xlsx";
 
 		List<String> schemaList = new ArrayList();
@@ -274,10 +274,10 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00BCRY6227");
 		schemaList.add("IE00BCRY5Y77");
 
-		pace9_1(username, password, schemaList, path);
+		pace9_1(username, password, from, to, schemaList, path);
 	}
 
-	public void paceE4T(String username, String password) {
+	public void paceE4T(String username, String password, String from, String to) {
 		String path = "/tmp/E4T.xlsx";
 
 		List<String> schemaList = new ArrayList();
@@ -296,7 +296,20 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00B2NPKV68");
 		schemaList.add("IE00BCRY5Y77");
 
-		pace9_1(username, password, schemaList, path);
+		pace9_1(username, password, from, to, schemaList, path);
+	}
+
+	public void paceE11T(String username, String password, String from, String to) {
+//		PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
+//		username = "jacky.lee@ebizprise.com";
+//		username = "pkpkpk";
+		String path = "/tmp/E11T.xlsx";
+
+		List<String> schemaList = new ArrayList();
+		schemaList.add("IE0032077012");
+
+		pace9_1(username, password, from, to, schemaList, path);
+//		pace0_3(paceStyle);
 	}
 
 	/**
@@ -421,7 +434,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 	/**
 	 * 表單自動化測試 -- 全品項預測 Step0_1: 共同部份,每個交易前5步驟都會一樣
 	 */
-	private void pace9_1(String username, String password, List<String> schemaList, String path) {
+	private void pace9_1(String username, String password, String from, String to, List<String> schemaList,
+			String path) {
 		// Class[] argType11 = {};
 		// Object[] args11 = {};
 		// DasCaptchForm dasCaptchForm1 = (DasCaptchForm) paceDefault.pace(
@@ -440,6 +454,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 			mp1.put("scheme", "ISIN");
 			mp1.put("value", schema);
 			mp1.put("currency", "USD");
+			mp1.put("data-source", "bloomberg");
 			queryList.add(mp1);
 		}
 		String token = token_type + " " + access_token;
@@ -457,8 +472,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		for (int i = 0; i < productFormList.size(); i++) {
 			ProductForm productForm = productFormList.get(i);
 			String assetId = productForm.getAssetId();
-			String from = "2019-05-16";
-			String to = "2019-05-23";
+
 			List priceList = paceDefault.pace13(token, assetId, from, to);
 			String schema = schemaList.get(i);
 			ep.outExcelposition(schema, sheetName1, 0, i + 1, path);
@@ -466,7 +480,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 			logger.info(schema);
 			showPrice(priceList, ep, sheetName1, path, i + 1, sheetName2);
 
-			List dvdList = paceDefault.pace14(token, assetId, "2019-05-14", "2019-05-21");
+			List dvdList = paceDefault.pace14(token, assetId, from, to);
 			ep.outExcelposition(schema, sheetName3, 0, i + 1, path);
 //			ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
 			showDvd(dvdList, ep, sheetName3, path, i + 1);
