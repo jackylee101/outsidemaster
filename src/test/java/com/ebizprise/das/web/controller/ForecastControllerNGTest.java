@@ -37,10 +37,11 @@ import com.prive.das.utils.ExcelPOIXml;
  * @author jacky.lee
  *
  */
-//@ActiveProfiles("dev2")
+// @ActiveProfiles("dev2")
 public class ForecastControllerNGTest extends RootNGTest {
 
-	private static final Log logger = LogFactory.getLog(ForecastControllerNGTest.class);
+	private static final Log logger = LogFactory
+			.getLog(ForecastControllerNGTest.class);
 
 	@LocalServerPort
 	protected int port;
@@ -73,23 +74,24 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return bo++;
 	}
 
-	protected static String[][] user1 = { { "prive_admin", "j@8u&SQw1!" }, { "irene_6.su@ebizprise.com", "1234" } };
+	protected static String[][] user1 = { { "prive_admin", "j@8u&SQw1!" },
+			{ "irene_6.su@ebizprise.com", "1234" } };
 
-//	@Test(threadPoolSize = 1, invocationCount = 1, timeOut = 5000000)
-//	public void pace0() {
-//
-//		// FPUtil.realHost = "http://192.168.128.23:8080";
-//		FPUtil.realHost = "http://localhost:8075";
-//		// FPUtil.realHost = "http://uatrds.rollingdemand.com.cn";
-//		try {
-//			Thread.sleep((int) (Math.random() * 3000));
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		int n = getWhich();
-//		logger.warn(n);
-//		pace1(user1[n][0], user1[n][1]);
-//	}
+	// @Test(threadPoolSize = 1, invocationCount = 1, timeOut = 5000000)
+	// public void pace0() {
+	//
+	// // FPUtil.realHost = "http://192.168.128.23:8080";
+	// FPUtil.realHost = "http://localhost:8075";
+	// // FPUtil.realHost = "http://uatrds.rollingdemand.com.cn";
+	// try {
+	// Thread.sleep((int) (Math.random() * 3000));
+	// } catch (InterruptedException e) {
+	// e.printStackTrace();
+	// }
+	// int n = getWhich();
+	// logger.warn(n);
+	// pace1(user1[n][0], user1[n][1]);
+	// }
 
 	public void paceE0A(String username, String password) {
 		String path = "/tmp/Fubon Nano#1 ETF NAV Calculator (for 20190514 go-live) Jacky.xlsx";
@@ -97,7 +99,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		XSSFWorkbook workbook = ep.loadExcel(path);
 		String sheetName = "MPs";
 		List list = ep.readExcel(workbook, sheetName);
-		String targetDate = "2019-05-23";
+		String targetDate = "2019-05-27";
 
 		ModelPortfolio E1T = prepareModel(targetDate, "E1T", list, 1, 5, 19);
 		ModelPortfolio E2T = prepareModel(targetDate, "E2T", list, 22, 25, 40);
@@ -115,8 +117,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 		showCurrencyNav(E4T);
 	}
 
-	private ModelPortfolio prepareModel(String targetDate, String modelName, List list, int navRow, int startrow,
-			int endrow) {
+	private ModelPortfolio prepareModel(String targetDate, String modelName,
+			List list, int navRow, int startrow, int endrow) {
 		List list1 = (List) list.get(navRow);
 		String navS = (String) list1.get(1);
 		BigDecimal nav = new BigDecimal(navS);
@@ -126,7 +128,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return mp;
 	}
 
-	private void prepareModelPortfolio(ModelPortfolio mp, List list, int startrow, int endrow) {
+	private void prepareModelPortfolio(ModelPortfolio mp, List list,
+			int startrow, int endrow) {
 
 		for (int i = startrow; i <= endrow; i++) {
 			List list1 = (List) list.get(i);
@@ -141,9 +144,10 @@ public class ForecastControllerNGTest extends RootNGTest {
 			BigDecimal price = new BigDecimal(priceS);
 			BigDecimal unit = new BigDecimal(unitS);
 
-			verify(mp.getNav(), weight, price, unit);
+			BigDecimal fixunit = verify(mp.getNav(), weight, price, unit);
 
-			Portfolio po = new Portfolio(name, isin, ccy, weight, price, unit);
+			Portfolio po = new Portfolio(name, isin, ccy, weight, price,
+					fixunit);
 			mp.addPortfolio(po);
 		}
 
@@ -161,12 +165,16 @@ public class ForecastControllerNGTest extends RootNGTest {
 			logger.error("weight有誤");
 	}
 
-	private void verify(BigDecimal nav, BigDecimal weight, BigDecimal price, BigDecimal unit) {
+	private BigDecimal verify(BigDecimal nav, BigDecimal weight,
+			BigDecimal price, BigDecimal unit) {
 		BigDecimal ret1 = nav.multiply(weight);
-		BigDecimal ret2 = ret1.divide(price, 8, BigDecimal.ROUND_HALF_UP);
+		BigDecimal ret2 = ret1.divide(price, 12, BigDecimal.ROUND_HALF_UP);
 		int ret3 = ret2.compareTo(unit);
-		if (ret3 != 0)
-			logger.error("unit有誤");
+		if (ret3 == 0) {
+			return unit;
+		}
+		logger.error("unit有誤");
+		return ret2;
 	}
 
 	/**
@@ -175,9 +183,9 @@ public class ForecastControllerNGTest extends RootNGTest {
 	 * TEST2.xlsx 屬於 Type1型的預測資料檔
 	 */
 	public void paceE0T(String username, String password, String from, String to) {
-//		PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
-//		username = "jacky.lee@ebizprise.com";
-//		username = "pkpkpk";
+		// PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
+		// username = "jacky.lee@ebizprise.com";
+		// username = "pkpkpk";
 		String path = "/tmp/E0T.xlsx";
 
 		List<String> schemaList = new ArrayList();
@@ -200,13 +208,13 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("LU1407889887");
 
 		pace9_1(username, password, from, to, schemaList, path);
-//		pace0_3(paceStyle);
+		// pace0_3(paceStyle);
 	}
 
 	public void paceE1T(String username, String password, String from, String to) {
-//		PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
-//		username = "jacky.lee@ebizprise.com";
-//		username = "pkpkpk";
+		// PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
+		// username = "jacky.lee@ebizprise.com";
+		// username = "pkpkpk";
 		String path = "/tmp/E1T.xlsx";
 
 		List<String> schemaList = new ArrayList();
@@ -226,7 +234,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00BCRY5Y77");
 
 		pace9_1(username, password, from, to, schemaList, path);
-//		pace0_3(paceStyle);
+		// pace0_3(paceStyle);
 	}
 
 	public void paceE2T(String username, String password, String from, String to) {
@@ -299,17 +307,18 @@ public class ForecastControllerNGTest extends RootNGTest {
 		pace9_1(username, password, from, to, schemaList, path);
 	}
 
-	public void paceE11T(String username, String password, String from, String to) {
-//		PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
-//		username = "jacky.lee@ebizprise.com";
-//		username = "pkpkpk";
+	public void paceE11T(String username, String password, String from,
+			String to) {
+		// PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
+		// username = "jacky.lee@ebizprise.com";
+		// username = "pkpkpk";
 		String path = "/tmp/E11T.xlsx";
 
 		List<String> schemaList = new ArrayList();
 		schemaList.add("IE0032077012");
 
 		pace9_1(username, password, from, to, schemaList, path);
-//		pace0_3(paceStyle);
+		// pace0_3(paceStyle);
 	}
 
 	/**
@@ -389,7 +398,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 	public void pace6(String email, String usrpwd) {
 		logger.warn("pace6");
 		String filePath = "/trainSalesForecastKaggle20190218_1.csv";
-		PaceStyle paceStyle = paceStyleFactory.getStyle("trainSalesForecastKaggle20190218");
+		PaceStyle paceStyle = paceStyleFactory
+				.getStyle("trainSalesForecastKaggle20190218");
 		email = "jacky.lee@ebizprise.com";
 		usrpwd = "pkpkpk";
 		pace0_1(email, usrpwd, filePath);
@@ -434,8 +444,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 	/**
 	 * 表單自動化測試 -- 全品項預測 Step0_1: 共同部份,每個交易前5步驟都會一樣
 	 */
-	private void pace9_1(String username, String password, String from, String to, List<String> schemaList,
-			String path) {
+	private void pace9_1(String username, String password, String from,
+			String to, List<String> schemaList, String path) {
 		// Class[] argType11 = {};
 		// Object[] args11 = {};
 		// DasCaptchForm dasCaptchForm1 = (DasCaptchForm) paceDefault.pace(
@@ -459,7 +469,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 		}
 		String token = token_type + " " + access_token;
 
-		List<ProductForm> productFormList = paceDefault.pace12(token, queryList);
+		List<ProductForm> productFormList = paceDefault
+				.pace12(token, queryList);
 		List lines = new ArrayList();
 
 		ExcelPOIXml ep = new ExcelPOIXml();
@@ -482,13 +493,14 @@ public class ForecastControllerNGTest extends RootNGTest {
 
 			List dvdList = paceDefault.pace14(token, assetId, from, to);
 			ep.outExcelposition(schema, sheetName3, 0, i + 1, path);
-//			ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
+			// ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
 			showDvd(dvdList, ep, sheetName3, path, i + 1);
 		}
 
 	}
 
-	private void pace9_2(String username, String password, String targetDate, ModelPortfolio E9T, String path) {
+	private void pace9_2(String username, String password, String targetDate,
+			ModelPortfolio E9T, String path) {
 		PriveAuthForm priveAuthForm = paceDefault.pace11(username, password);
 		String access_token = priveAuthForm.getAccess_token();
 		String token_type = priveAuthForm.getToken_type();
@@ -509,10 +521,11 @@ public class ForecastControllerNGTest extends RootNGTest {
 			mp1.put("scheme", "ISIN");
 			mp1.put("value", portfolio.getIsin());
 			mp1.put("currency", "USD");
-
+			mp1.put("data-source", "bloomberg");
 			List queryList = new ArrayList();
 			queryList.add(mp1);
-			List<ProductForm> productFormList = paceDefault.pace12(token, queryList);
+			List<ProductForm> productFormList = paceDefault.pace12(token,
+					queryList);
 
 			if (productFormList.size() != 1) {
 				logger.error("沒asset ID");
@@ -521,15 +534,18 @@ public class ForecastControllerNGTest extends RootNGTest {
 				String assetId = productForm.getAssetId();
 				portfolio.setAssetId(assetId);
 
-				List priceList = paceDefault.pace13(token, assetId, "2019-05-14", to);
+				List priceList = paceDefault.pace13(token, assetId,
+						"2019-05-14", to);
 				PriceForm2 priceForm = (PriceForm2) priceList.get(0);
 				BigDecimal closePx = takePrice(priceList, targetDate);
-//				logger.info(priceForm.getLocalDate() + " : " + priceForm.getClosePx());
-//				BigDecimal closePx = new BigDecimal(priceForm.getClosePx());
+				// logger.info(priceForm.getLocalDate() + " : " +
+				// priceForm.getClosePx());
+				// BigDecimal closePx = new BigDecimal(priceForm.getClosePx());
 				portfolio.setClosePx(closePx);
 				portfolio.setLocalDate(priceForm.getLocalDate());
 
-				List dvdList = paceDefault.pace14(token, assetId, "2019-05-14", to);
+				List dvdList = paceDefault.pace14(token, assetId, "2019-05-14",
+						to);
 				BigDecimal dvd = takeDvd(dvdList, targetDate);
 				portfolio.setDvd(dvd);
 			}
@@ -563,76 +579,82 @@ public class ForecastControllerNGTest extends RootNGTest {
 	 * 表單自動化測試 -- 全品項預測 Step0_1: 共同部份,每個交易前5步驟都會一樣
 	 */
 	private void pace0_1(String username, String password, String path) {
-//		PriveAuthForm priveAuthForm = paceDefault.pace11(username, password);
-//		String access_token = priveAuthForm.getAccess_token();
-//		String token_type = priveAuthForm.getToken_type();
-//		Assert.assertNotNull(token_type);
-//		Assert.assertNotNull(access_token);
-//
-//		List<String> schemaList = new ArrayList();
-//		schemaList.add("IE0005042456");
-//		schemaList.add("IE00B53QG562");
-//		schemaList.add("IE00B2QWCY14");
-//		schemaList.add("IE00B5BMR087");
-//		schemaList.add("LU1781541252");
-//		schemaList.add("IE00B52MJY50");
-//		schemaList.add("IE00BKM4GZ66");
-//		schemaList.add("IE00B52SF786");
-//		schemaList.add("IE00BSKRJZ44");
-//		schemaList.add("IE00BZ163M45");
-//		schemaList.add("IE00B2NPKV68");
-//		schemaList.add("LU1452600270");
-//		schemaList.add("IE00BCRY6227");
-//		schemaList.add("IE00BCRY5Y77");
-//		schemaList.add("IE00B2QWDY88");
-//		schemaList.add("IE0032077012");
-//		schemaList.add("LU1407889887");
-//
-//		List queryList = new ArrayList();
-//		for (int i = 0; i < schemaList.size(); i++) {
-//			String schema = schemaList.get(i);
-//			Map mp1 = new HashMap();
-//			mp1.put("scheme", "ISIN");
-//			mp1.put("value", schema);
-//			mp1.put("currency", "USD");
-//			queryList.add(mp1);
-//		}
-//		String token = token_type + " " + access_token;
-//
-//		List<ProductForm> productFormList = paceDefault.pace12(token, queryList);
-//		List lines = new ArrayList();
-//
-//		ExcelPOIXml ep = new ExcelPOIXml();
-//		ep.outExcel(lines, path);
-//		String sheetName = "Sheet 1";
-//		String sheetName2 = "Sheet 2";
-//		ep.outExcelposition("Date", sheetName, 0, 0, path);
-//		ep.outExcelposition("Date", sheetName2, 0, 0, path);
-//		for (int i = 0; i < productFormList.size(); i++) {
-//			ProductForm productForm = productFormList.get(i);
-//			String assetId = productForm.getAssetId();
-//			String from = "2019-05-01";
-//			String to = "2019-05-13";
-//			List priceList = paceDefault.pace13(token, assetId, from, to);
-//			String schema = schemaList.get(i);
-//			ep.outExcelposition(schema, sheetName, 0, i + 1, path);
-//			ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
-//			logger.info(schema);
-//			showPrice(priceList, ep, sheetName, path, i + 1, sheetName2);
-//		}
+		// PriveAuthForm priveAuthForm = paceDefault.pace11(username, password);
+		// String access_token = priveAuthForm.getAccess_token();
+		// String token_type = priveAuthForm.getToken_type();
+		// Assert.assertNotNull(token_type);
+		// Assert.assertNotNull(access_token);
+		//
+		// List<String> schemaList = new ArrayList();
+		// schemaList.add("IE0005042456");
+		// schemaList.add("IE00B53QG562");
+		// schemaList.add("IE00B2QWCY14");
+		// schemaList.add("IE00B5BMR087");
+		// schemaList.add("LU1781541252");
+		// schemaList.add("IE00B52MJY50");
+		// schemaList.add("IE00BKM4GZ66");
+		// schemaList.add("IE00B52SF786");
+		// schemaList.add("IE00BSKRJZ44");
+		// schemaList.add("IE00BZ163M45");
+		// schemaList.add("IE00B2NPKV68");
+		// schemaList.add("LU1452600270");
+		// schemaList.add("IE00BCRY6227");
+		// schemaList.add("IE00BCRY5Y77");
+		// schemaList.add("IE00B2QWDY88");
+		// schemaList.add("IE0032077012");
+		// schemaList.add("LU1407889887");
+		//
+		// List queryList = new ArrayList();
+		// for (int i = 0; i < schemaList.size(); i++) {
+		// String schema = schemaList.get(i);
+		// Map mp1 = new HashMap();
+		// mp1.put("scheme", "ISIN");
+		// mp1.put("value", schema);
+		// mp1.put("currency", "USD");
+		// queryList.add(mp1);
+		// }
+		// String token = token_type + " " + access_token;
+		//
+		// List<ProductForm> productFormList = paceDefault.pace12(token,
+		// queryList);
+		// List lines = new ArrayList();
+		//
+		// ExcelPOIXml ep = new ExcelPOIXml();
+		// ep.outExcel(lines, path);
+		// String sheetName = "Sheet 1";
+		// String sheetName2 = "Sheet 2";
+		// ep.outExcelposition("Date", sheetName, 0, 0, path);
+		// ep.outExcelposition("Date", sheetName2, 0, 0, path);
+		// for (int i = 0; i < productFormList.size(); i++) {
+		// ProductForm productForm = productFormList.get(i);
+		// String assetId = productForm.getAssetId();
+		// String from = "2019-05-01";
+		// String to = "2019-05-13";
+		// List priceList = paceDefault.pace13(token, assetId, from, to);
+		// String schema = schemaList.get(i);
+		// ep.outExcelposition(schema, sheetName, 0, i + 1, path);
+		// ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
+		// logger.info(schema);
+		// showPrice(priceList, ep, sheetName, path, i + 1, sheetName2);
+		// }
 
 	}
 
-	private void showPrice(List priceList, ExcelPOIXml ep, String sheetName, String path, int field,
-			String sheetName2) {
+	private void showPrice(List priceList, ExcelPOIXml ep, String sheetName,
+			String path, int field, String sheetName2) {
 		for (int i = 0; i < priceList.size(); i++) {
 			PriceForm2 priceForm = (PriceForm2) priceList.get(i);
-			logger.info(priceForm.getLocalDate() + " : " + priceForm.getClosePx());
-			ep.outExcelposition(priceForm.getClosePx(), sheetName, i + 1, field, path);
-			ep.outExcelposition(priceForm.getLocalDate(), sheetName, i + 1, 0, path);
+			logger.info(priceForm.getLocalDate() + " : "
+					+ priceForm.getClosePx());
+			ep.outExcelposition(priceForm.getClosePx(), sheetName, i + 1,
+					field, path);
+			ep.outExcelposition(priceForm.getLocalDate(), sheetName, i + 1, 0,
+					path);
 
-			ep.outExcelposition(priceForm.getClosePx(), sheetName2, i + 1, field * 2 - 1, path);
-			ep.outExcelposition(priceForm.getLocalDate(), sheetName2, i + 1, 0, path);
+			ep.outExcelposition(priceForm.getClosePx(), sheetName2, i + 1,
+					field * 2 - 1, path);
+			ep.outExcelposition(priceForm.getLocalDate(), sheetName2, i + 1, 0,
+					path);
 		}
 	}
 
@@ -651,12 +673,15 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return new BigDecimal(0);
 	}
 
-	private void showDvd(List dvdList, ExcelPOIXml ep, String sheetName3, String path, int field) {
+	private void showDvd(List dvdList, ExcelPOIXml ep, String sheetName3,
+			String path, int field) {
 		for (int i = 0; i < dvdList.size(); i++) {
 			DvdForm2 dvdForm2 = (DvdForm2) dvdList.get(i);
 			logger.info(dvdForm2.getExDate() + " : " + dvdForm2.getValue());
-			ep.outExcelposition(dvdForm2.getValue(), sheetName3, i + 1, field, path);
-			ep.outExcelposition(dvdForm2.getExDate(), sheetName3, i + 1, 0, path);
+			ep.outExcelposition(dvdForm2.getValue(), sheetName3, i + 1, field,
+					path);
+			ep.outExcelposition(dvdForm2.getExDate(), sheetName3, i + 1, 0,
+					path);
 		}
 	}
 

@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ForecastController3NGTest extends ForecastControllerNGTest {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-//	@Test
+	@Test
 	public void pace0() {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 		// FPUtil.realHost = "http://localhost:8075";
@@ -31,7 +31,7 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 		}
 		int n = getWhich();
 		String from = "2019-05-14";
-		String to = "2019-05-27";
+		String to = "2019-05-28";
 
 		logger.warn(String.valueOf(n));
 		paceE0T(user1[n][0], user1[n][1], from, to);
@@ -41,7 +41,7 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 		paceE4T(user1[n][0], user1[n][1], from, to);
 	}
 
-//	@Test
+	@Test
 	public void pace1() {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 
