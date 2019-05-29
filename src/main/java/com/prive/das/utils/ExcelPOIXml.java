@@ -2,6 +2,7 @@ package com.prive.das.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,8 +37,7 @@ public class ExcelPOIXml {
 
 	private static Log logger = LogFactory.getLog(ExcelPOIXml.class);
 
-	public void setStyleValue2003(XSSFCell celX, XSSFCellStyle cell,
-			XSSFFont font) {
+	public void setStyleValue2003(XSSFCell celX, XSSFCellStyle cell, XSSFFont font) {
 //		cell.setBorderLeft((short) 1);
 //		cell.setBorderBottom((short) 1);
 //		cell.setBorderRight((short) 1);
@@ -87,26 +87,20 @@ public class ExcelPOIXml {
 						// logger.info("error: hm.get(" + header
 						// + ") is null");
 						field = "";
-					} else if ("class java.lang.String".equals(obj.getClass()
-							.toString()))
+					} else if ("class java.lang.String".equals(obj.getClass().toString()))
 						field = (String) obj;
-					else if ("class java.lang.Integer".equals(obj.getClass()
-							.toString()))
+					else if ("class java.lang.Integer".equals(obj.getClass().toString()))
 						field = String.valueOf(obj);
-					else if ("class java.math.BigDecimal".equals(obj.getClass()
-							.toString()))
+					else if ("class java.math.BigDecimal".equals(obj.getClass().toString()))
 						field = String.valueOf(obj);
-					else if ("class java.lang.Double".equals(obj.getClass()
-							.toString()))
+					else if ("class java.lang.Double".equals(obj.getClass().toString()))
 						field = String.valueOf(obj);
-					else if ("class java.util.ArrayList".equals(obj.getClass()
-							.toString())) {
+					else if ("class java.util.ArrayList".equals(obj.getClass().toString())) {
 						List ay = (List) obj;
 						for (int k = 0; k < ay.size(); k++) {
 							field += (String) ay.get(k) + ",";
 						}
-					} else if ("class java.lang.Boolean".equals(obj.getClass()
-							.toString())) {
+					} else if ("class java.lang.Boolean".equals(obj.getClass().toString())) {
 						field = String.valueOf(obj);
 						// } else if
 						// ("class java.sql.Timestamp".equals(obj.getClass().toString()))
@@ -137,6 +131,118 @@ public class ExcelPOIXml {
 			outputStream = new FileOutputStream(new File(path));
 			workbook.write(outputStream);
 			logger.info("輸出xlsx:" + path + "成功");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
+	public void outExcel(String sheetName, List lines, String path) {
+		FileInputStream is;
+		XSSFWorkbook workbook;
+		File f = new File(path);
+		if (f.exists()) {
+			workbook = new XSSFWorkbook();
+			try {
+				is = new FileInputStream(f);
+				workbook = new XSSFWorkbook(is);
+				is.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			workbook = new XSSFWorkbook();
+		}
+		XSSFSheet sheet = workbook.createSheet(sheetName);
+		XSSFFont font = workbook.createFont();
+		XSSFCellStyle cell11 = workbook.createCellStyle();
+
+		font.setFontHeightInPoints((short) 10);
+		font.setFontName("Arial");
+		font.setBoldweight(XSSFFont.BOLDWEIGHT_NORMAL);
+
+		XSSFRow row;
+		XSSFCell cell;
+		// sheet.protectSheet("password");
+		// CellStyle unlockedCellStyle = workbook.createCellStyle();
+		// unlockedCellStyle.setLocked(false); // true or false based on the
+		// cell.
+
+		// head
+		// row = sheet.createRow(0);
+		// body
+		try {
+			int i = 0;
+			for (i = 0; i < lines.size(); i++) {
+				if (i % 1000 == 0)
+					logger.info(i);
+				else if (i % 10 == 0)
+					System.out.print(".");
+
+				row = sheet.createRow(i);
+				List ay1 = (List) lines.get(i);
+				for (int j = 0; j < ay1.size(); j++) {
+					Object obj = ay1.get(j);
+
+					String field = "";
+					if (obj == null) {
+						// logger.info("error: hm.get(" + header
+						// + ") is null");
+						field = "";
+					} else if ("class java.lang.String".equals(obj.getClass().toString()))
+						field = (String) obj;
+					else if ("class java.lang.Integer".equals(obj.getClass().toString()))
+						field = String.valueOf(obj);
+					else if ("class java.math.BigDecimal".equals(obj.getClass().toString()))
+						field = String.valueOf(obj);
+					else if ("class java.lang.Double".equals(obj.getClass().toString()))
+						field = String.valueOf(obj);
+					else if ("class java.util.ArrayList".equals(obj.getClass().toString())) {
+						List ay = (List) obj;
+						for (int k = 0; k < ay.size(); k++) {
+							field += (String) ay.get(k) + ",";
+						}
+					} else if ("class java.lang.Boolean".equals(obj.getClass().toString())) {
+						field = String.valueOf(obj);
+						// } else if
+						// ("class java.sql.Timestamp".equals(obj.getClass().toString()))
+						// {
+						// field = timestamp2string((Timestamp) obj);
+					} else {
+						logger.info("錯誤!未處理: " + obj.getClass().toString());
+					}
+					cell = row.createCell(j);
+					cell.setCellValue(field);
+					// if ("COL003".equals(field))
+					// cell.setCellStyle(unlockedCellStyle);
+				}
+			}
+			System.out.print(i);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		// adjust width
+		for (int i = 0; i <= 20; i++) {
+			sheet.autoSizeColumn((short) i);
+		}
+
+		// done
+		OutputStream outputStream = null;
+		try {
+			outputStream = new FileOutputStream(new File(path));
+			workbook.write(outputStream);
+			logger.info("輸出xlsx:" + path + "  sheet:" + sheetName + " 成功");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -193,14 +299,11 @@ public class ExcelPOIXml {
 						// logger.info("error: hm.get(" + header
 						// + ") is null");
 						field = "null";
-					} else if ("class java.lang.String".equals(obj.getClass()
-							.toString()))
+					} else if ("class java.lang.String".equals(obj.getClass().toString()))
 						field = (String) obj;
-					else if ("class java.lang.Integer".equals(obj.getClass()
-							.toString()))
+					else if ("class java.lang.Integer".equals(obj.getClass().toString()))
 						field = String.valueOf(obj);
-					else if ("class java.util.ArrayList".equals(obj.getClass()
-							.toString())) {
+					else if ("class java.util.ArrayList".equals(obj.getClass().toString())) {
 						List ay = (List) obj;
 						for (int k = 0; k < ay.size(); k++) {
 							field += (String) ay.get(k) + ",";
@@ -244,20 +347,40 @@ public class ExcelPOIXml {
 
 	}
 
-	public void outExcelposition(String message, String sheetName, int line,
-			int field, String path) {
+	public void outExcelposition(String message, String sheetName, int line, int field, String path) {
 		InputStream is = null;
 		XSSFWorkbook workbook = null;
 		OutputStream outputStream = null;
 		try {
-			is = new FileInputStream(new File(path));
+			File f = new File(path);
+//			if (!f.exists()) {
+//				f.createNewFile();
+//				workbook = new XSSFWorkbook();
+//				XSSFSheet sheet = workbook.createSheet(sheetName);
+//				try {
+//					outputStream = new FileOutputStream(f);
+//					workbook.write(outputStream);
+//					logger.info("輸出xls" + path + "空檔成功");
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				} finally {
+//					if (outputStream != null) {
+//						try {
+//							outputStream.close();
+//						} catch (IOException e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				}
+//			}
+			is = new FileInputStream(f);
 			workbook = new XSSFWorkbook(is);
 			is.close();
 
 			XSSFSheet sheet = workbook.getSheet(sheetName);
 			if (sheet == null)
 				sheet = workbook.createSheet(sheetName);
-			
+
 			XSSFFont font = workbook.createFont();
 			XSSFCellStyle cell11 = workbook.createCellStyle();
 
@@ -419,8 +542,7 @@ public class ExcelPOIXml {
 		}
 	}
 
-	public List readExcel(XSSFWorkbook workbook, String sheetName, int headRow,
-			int dataRow, int startCell) {
+	public List readExcel(XSSFWorkbook workbook, String sheetName, int headRow, int dataRow, int startCell) {
 		List ay = null;
 		int j = 0;
 		int i = 0;
@@ -496,8 +618,7 @@ public class ExcelPOIXml {
 		}
 	}
 
-	public List readExcelx(XSSFWorkbook workbook, String sheetName,
-			int headRow, int dataRow, int startCell) {
+	public List readExcelx(XSSFWorkbook workbook, String sheetName, int headRow, int dataRow, int startCell) {
 		List ay = null;
 		int j = 0;
 		int i = 0;
@@ -562,8 +683,7 @@ public class ExcelPOIXml {
 		}
 	}
 
-	public List readExcel(XSSFWorkbook workbook, String sheetName, int dataRow,
-			int targetCell) {
+	public List readExcel(XSSFWorkbook workbook, String sheetName, int dataRow, int targetCell) {
 		List ayValue = null;
 		try {
 			XSSFSheet sheet = workbook.getSheet(sheetName);
@@ -620,16 +740,14 @@ public class ExcelPOIXml {
 					// value = date2string(date, "yyyy-MM-dd'T'HH:mm:ss");
 					DateFormat writeFormat = new SimpleDateFormat("yyyyMMdd");
 					value = writeFormat.format(date);
-					logger.warn("讀取excel數字RAW異常D:" + date + " -->" + value
-							+ ";");
+					logger.warn("讀取excel數字RAW異常D:" + date + " -->" + value + ";");
 				} else {
 					value = cell.getRawValue();
 					// if (value.length() > 7) {
 					if (StringUtils.indexOf(value, ".") >= 0) { // 小數點
 						Double d = cell.getNumericCellValue();
 						String value2 = String.valueOf(d);
-						logger.warn("讀取excel數字RAW異常_1:" + value + " --> "
-								+ value2);
+						logger.warn("讀取excel數字RAW異常_1:" + value + " --> " + value2);
 
 						if (StringUtils.indexOf(value2, "E") >= 0) { // 科學符號(數字大於八位數=8.765432111E7)
 							d = cell.getNumericCellValue();
@@ -638,8 +756,7 @@ public class ExcelPOIXml {
 							b = b.setScale(6, RoundingMode.HALF_UP);
 							value2 = b.toPlainString();
 
-							logger.warn("讀取excel數字RAW異常_1.2(科學符號):" + value
-									+ " --> " + value2.trim());
+							logger.warn("讀取excel數字RAW異常_1.2(科學符號):" + value + " --> " + value2.trim());
 							value = value2;
 						}
 						value = value2;
@@ -650,8 +767,7 @@ public class ExcelPOIXml {
 						b = b.setScale(6, RoundingMode.HALF_UP);
 						String value2 = b.toPlainString();
 
-						logger.warn("讀取excel數字RAW異常_2(科學符號):" + value + " --> "
-								+ value2);
+						logger.warn("讀取excel數字RAW異常_2(科學符號):" + value + " --> " + value2);
 						value = value2;
 					} else {
 						// logger.warn("讀取excel數字RAW異常3:" + value + " -->");
@@ -873,8 +989,7 @@ public class ExcelPOIXml {
 				} else if (newFile.getName().endsWith(".xlsx")) {
 					workbook = new XSSFWorkbook();
 				} else {
-					throw new IllegalArgumentException(
-							"I don't know how to create that kind of new file");
+					throw new IllegalArgumentException("I don't know how to create that kind of new file");
 				}
 			}
 

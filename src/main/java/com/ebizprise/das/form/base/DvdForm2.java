@@ -8,6 +8,19 @@ public class DvdForm2 {
 	private String dataSource;
 	private String assetId;
 
+	public DvdForm2() {
+		super();
+	}
+
+	public DvdForm2(DvdForm2 dvdForm2) {
+		super();
+		this.Id = dvdForm2.getId();
+		this.exDate = dvdForm2.getExDate();
+		this.value = dvdForm2.getValue();
+		this.dataSource = dvdForm2.getDataSource();
+		this.assetId = dvdForm2.getAssetId();
+	}
+
 	public String getId() {
 		return Id;
 	}

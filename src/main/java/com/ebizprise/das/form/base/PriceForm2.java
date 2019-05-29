@@ -11,6 +11,20 @@ public class PriceForm2 {
 	private String closePx;
 	private String dataSource;
 
+	public PriceForm2() {
+		super();
+	}
+
+	public PriceForm2(PriceForm2 priceForm2) {
+		super();
+		this.Id = priceForm2.getId();
+		this.type = priceForm2.getType();
+		this.assetId = priceForm2.getAssetId();
+		this.localDate = priceForm2.getLocalDate();
+		this.closePx = priceForm2.getClosePx();
+		this.dataSource = priceForm2.getDataSource();
+	}
+
 	public String getId() {
 		return Id;
 	}

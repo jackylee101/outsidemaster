@@ -31,6 +31,16 @@ public class Portfolio {
 		this.unit = unit;
 	}
 
+	public Portfolio(String localDate, String price) {
+		this.localDate = localDate;
+		this.price = new BigDecimal(price);
+	}
+
+	public Portfolio(Portfolio portfolio) {
+		this.localDate = portfolio.getLocalDate();
+		this.price = portfolio.getPrice();
+	}
+
 	public String getName() {
 		return name;
 	}

@@ -20,7 +20,7 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Test
-	public void pace0() {
+	public void pace_Price_excel() {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 		// FPUtil.realHost = "http://localhost:8075";
 		// FPUtil.realHost = "http://uatrds.rollingdemand.com.cn";
@@ -42,14 +42,20 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 	}
 
 	@Test
-	public void pace1() {
+	public void pace_NAV_everyday() {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 
 		paceE0A(user1[0][0], user1[0][1]);
 	}
 
 	@Test
-	public void pace3() {
+	public void pace_bloomberg_PRICE_INDEX() {
+		String csv = "bloomberg_PRICE_INDEX3364948632092236085";
+		paceE0S(csv);
+	}
+
+	@Test
+	public void pace_Backtesting() {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 		// FPUtil.realHost = "http://localhost:8075";
 		// FPUtil.realHost = "http://uatrds.rollingdemand.com.cn";
@@ -60,8 +66,8 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 		}
 		int n = getWhich();
 		logger.warn(String.valueOf(n));
-		String from = "2015-03-25";
-		String to = "2019-05-27";
+		String from = "2015-03-15";
+		String to = "2019-05-16";
 		paceE11T(user1[n][0], user1[n][1], from, to);
 	}
 }

@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.thymeleaf.util.DateUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -29,7 +28,7 @@ import com.ebizprise.das.form.base.PriceForm2;
 import com.ebizprise.das.form.base.PriveAuthForm;
 import com.ebizprise.das.form.base.ProductForm;
 import com.ebizprise.das.form.system.QueryForm;
-import com.ebizprise.das.form.userInfo.UserInfoCheckForm;
+import com.ebizprise.das.pojo.Portfolio;
 import com.ebizprise.das.utils.DateUtil;
 
 //import com.google.common.collect.Maps;
@@ -91,8 +90,7 @@ public class PaceDefault extends PaceBase {
 		ResponseEntity<String> response = paceType(url, HttpMethod.POST, params);
 		// 輸出結果
 		logger.info(response.getBody());
-		PriveAuthForm priveAuthForm = JSON.parseObject(response.getBody(),
-				PriveAuthForm.class);
+		PriveAuthForm priveAuthForm = JSON.parseObject(response.getBody(), PriveAuthForm.class);
 
 		return priveAuthForm;
 	}
@@ -102,8 +100,7 @@ public class PaceDefault extends PaceBase {
 	 */
 	public List<ProductForm> pace12(String token, List<Map> queryList) {
 		String url = FPUtil.makeUrl("/assets/1/fubon-tw/codes");
-		ResponseEntity<String> response = paceType(token, url, HttpMethod.POST,
-				queryList);
+		ResponseEntity<String> response = paceType(token, url, HttpMethod.POST, queryList);
 		// 輸出結果
 		logger.info(response.getBody());
 		List productList = JSON.parseObject(response.getBody(), List.class);
@@ -111,8 +108,7 @@ public class PaceDefault extends PaceBase {
 
 		for (int i = 0; i < productList.size(); i++) {
 			JSONObject product = (JSONObject) productList.get(i);
-			ProductForm productForm = JSON.parseObject(product.toJSONString(),
-					ProductForm.class);
+			ProductForm productForm = JSON.parseObject(product.toJSONString(), ProductForm.class);
 			productFormList.add(productForm);
 		}
 		return productFormList;
@@ -122,24 +118,21 @@ public class PaceDefault extends PaceBase {
 	 * 取得特定基金的時段收盤價
 	 */
 	public List pace13(String token, String assetId, String from, String to) {
-		String url = FPUtil.makeUrl("/assets/1/fubon-tw/assets/" + assetId
-				+ "/series?from=" + from + "&until=" + to
+		String url = FPUtil.makeUrl("/assets/1/fubon-tw/assets/" + assetId + "/series?from=" + from + "&until=" + to
 				+ "&type=daily&priceDataType=RAW");
 		Map<String, ?> params = new HashMap();
-		ResponseEntity<String> response = paceType(token, url, HttpMethod.GET,
-				params);
+		ResponseEntity<String> response = paceType(token, url, HttpMethod.GET, params);
 		// 輸出結果
 		logger.info(response.getBody());
-		PriceForm priceForm = JSON.parseObject(response.getBody(),
-				PriceForm.class);
+		PriceForm priceForm = JSON.parseObject(response.getBody(), PriceForm.class);
 		List list = priceForm.getPrices();
 		List priceList = new ArrayList();
 		Date dFrom = DateUtil.str2Date(from, "yyyy-MM-dd");
 		Date dTo = DateUtil.str2Date(to, "yyyy-MM-dd");
-		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(
-				dIdx, 1)) {
+		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
 			PriceForm2 priceForm2 = queryPrice(list, dIdx);
-			priceList.add(priceForm2);
+			if (priceForm2 != null)
+				priceList.add(priceForm2);
 		}
 
 		return priceList;
@@ -148,12 +141,11 @@ public class PaceDefault extends PaceBase {
 	/**
 	 * 取得特定基金的時段配股
 	 */
-	public List pace14(String token, String assetId, String from, String to) {
-		String url = FPUtil.makeUrl("/assets/1/fubon-tw/assets/" + assetId
-				+ "/dividends?from=" + from + "&until=" + to + "&type=daily");
+	public List pace14(String token, String assetId, String from, String to, List listDividends) {
+		String url = FPUtil.makeUrl(
+				"/assets/1/fubon-tw/assets/" + assetId + "/dividends?from=" + from + "&until=" + to + "&type=daily");
 		Map<String, ?> params = new HashMap();
-		ResponseEntity<String> response = paceType(token, url, HttpMethod.GET,
-				params);
+		ResponseEntity<String> response = paceType(token, url, HttpMethod.GET, params);
 		// 輸出結果
 		logger.info(response.getBody());
 		DvdForm dvdForm = JSON.parseObject(response.getBody(), DvdForm.class);
@@ -161,11 +153,11 @@ public class PaceDefault extends PaceBase {
 		List dvdList = new ArrayList();
 		Date dFrom = DateUtil.str2Date(from, "yyyy-MM-dd");
 		Date dTo = DateUtil.str2Date(to, "yyyy-MM-dd");
-		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(
-				dIdx, 1)) {
+		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
 			DvdForm2 dvdForm2 = queryDvd(list, dIdx);
 			dvdList.add(dvdForm2);
 		}
+		listDividends.addAll(list);
 		return dvdList;
 	}
 
@@ -173,12 +165,11 @@ public class PaceDefault extends PaceBase {
 		DvdForm2 keep = new DvdForm2();
 		for (int i = 0; i < list.size(); i++) {
 			JSONObject dvd = (JSONObject) list.get(i);
-			DvdForm2 dvdForm2 = JSON.parseObject(dvd.toJSONString(),
-					DvdForm2.class);
+			DvdForm2 dvdForm2 = JSON.parseObject(dvd.toJSONString(), DvdForm2.class);
 			String localDate = dvdForm2.getExDate();
 			Date dlocalDate = DateUtil.str2Date(localDate, "yyyyMMdd");
 			if (DateUtil.Less(dlocalDate, dIdx))
-				keep = dvdForm2;
+				keep = new DvdForm2(dvdForm2);
 			if (DateUtil.Equ(dlocalDate, dIdx))
 				return dvdForm2;
 		}
@@ -191,18 +182,42 @@ public class PaceDefault extends PaceBase {
 		PriceForm2 keep = null;
 		for (int i = 0; i < list.size(); i++) {
 			JSONObject price = (JSONObject) list.get(i);
-			PriceForm2 priceForm2 = JSON.parseObject(price.toJSONString(),
-					PriceForm2.class);
+			PriceForm2 priceForm2 = JSON.parseObject(price.toJSONString(), PriceForm2.class);
 			String localDate = priceForm2.getLocalDate();
 			Date dlocalDate = DateUtil.str2Date(localDate, "yyyyMMdd");
 			if (DateUtil.Less(dlocalDate, dIdx))
-				keep = priceForm2;
+				keep = new PriceForm2(priceForm2);
 			if (DateUtil.Equ(dlocalDate, dIdx))
 				return priceForm2;
 		}
 		String targetDate = DateUtil.date2str(dIdx, "yyyyMMdd");
+		if (keep == null) {
+			logger.warn(targetDate + " 沒資料 還沒開始有資料");
+			return keep;
+		}
 		logger.warn(targetDate + " 沒資料,用 " + keep.getLocalDate() + " 代替");
 		keep.setLocalDate(targetDate);
+		return keep;
+	}
+
+	public Portfolio queryPortfolio(List<Portfolio> listPortfolio, Date dIdx) {
+		Portfolio keep = null;
+		for (int i = 0; i < listPortfolio.size(); i++) {
+			Portfolio portfolio = listPortfolio.get(i);
+			String localDate = portfolio.getLocalDate();
+//			if ("20160101".equals(localDate)) {
+//				String tDate = DateUtil.date2str(dIdx, "yyyyMMdd");
+//				if ("20160101".equals(tDate))
+//					logger.error("why");
+//			}
+			Date dlocalDate = DateUtil.str2Date(localDate, "yyyyMMdd");
+			if (DateUtil.Less(dlocalDate, dIdx))
+				keep = new Portfolio(portfolio);
+			if (DateUtil.Equ(dlocalDate, dIdx))
+				return portfolio;
+		}
+		if (keep != null)
+			keep.setLocalDate(DateUtil.date2str(dIdx, "yyyyMMdd"));
 		return keep;
 	}
 
@@ -215,8 +230,7 @@ public class PaceDefault extends PaceBase {
 		logger.warn("/upload/ 開始 ");
 		long begintime = System.currentTimeMillis();
 
-		ResponseEntity<String> response = fileUpload(filePath, url, custId,
-				prjItmId);
+		ResponseEntity<String> response = fileUpload(filePath, url, custId, prjItmId);
 
 		long endtime = System.currentTimeMillis();
 		long costTime = (endtime - begintime);
@@ -224,8 +238,7 @@ public class PaceDefault extends PaceBase {
 
 		// 輸出結果
 		logger.info(response.getBody());
-		QueryForm queryForm = JSON.parseObject(response.getBody(),
-				QueryForm.class);
+		QueryForm queryForm = JSON.parseObject(response.getBody(), QueryForm.class);
 
 		return queryForm;
 	}
@@ -256,8 +269,7 @@ public class PaceDefault extends PaceBase {
 	// return queryForm;
 	// }
 
-	private ResponseEntity<String> fileUpload(String filePath, String url,
-			String custId, String prjItmId) {
+	private ResponseEntity<String> fileUpload(String filePath, String url, String custId, String prjItmId) {
 
 		URL urlfile = this.getClass().getResource(filePath);
 		File file = new File(urlfile.getFile());
@@ -268,10 +280,8 @@ public class PaceDefault extends PaceBase {
 		param.add("prjItmId", prjItmId);
 		param.add("type", 1);
 
-		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<MultiValueMap<String, Object>>(
-				param);
-		ResponseEntity<String> response = restTemplate.exchange(url,
-				HttpMethod.POST, requestEntity, String.class);
+		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<MultiValueMap<String, Object>>(param);
+		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 		return response;
 	}
 

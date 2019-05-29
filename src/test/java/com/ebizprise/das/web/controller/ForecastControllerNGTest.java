@@ -1,5 +1,6 @@
 package com.ebizprise.das.web.controller;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,20 +17,26 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.thymeleaf.util.StringUtils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.ebizprise.das.RootNGTest;
 import com.ebizprise.das.form.base.DvdForm2;
 import com.ebizprise.das.form.base.PriceForm2;
 import com.ebizprise.das.form.base.PriveAuthForm;
 import com.ebizprise.das.form.base.ProductForm;
 import com.ebizprise.das.form.system.QueryForm;
+import com.ebizprise.das.pojo.Benchmark;
 import com.ebizprise.das.pojo.ModelPortfolio;
 import com.ebizprise.das.pojo.Portfolio;
+import com.ebizprise.das.utils.AccessFile;
 import com.ebizprise.das.utils.DateUtil;
 import com.ebizprise.das.web.controller.minor.FPUtil;
 import com.ebizprise.das.web.controller.minor.PaceDefault;
 import com.ebizprise.das.web.controller.minor.PaceStyle;
 import com.ebizprise.das.web.controller.suite.forecast.PaceStyleFactory;
 import com.prive.das.utils.ExcelPOIXml;
+
+import bsh.StringUtil;
 
 /**
  * 單品項預測 大單元測試
@@ -40,8 +47,7 @@ import com.prive.das.utils.ExcelPOIXml;
 // @ActiveProfiles("dev2")
 public class ForecastControllerNGTest extends RootNGTest {
 
-	private static final Log logger = LogFactory
-			.getLog(ForecastControllerNGTest.class);
+	private static final Log logger = LogFactory.getLog(ForecastControllerNGTest.class);
 
 	@LocalServerPort
 	protected int port;
@@ -74,8 +80,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return bo++;
 	}
 
-	protected static String[][] user1 = { { "prive_admin", "j@8u&SQw1!" },
-			{ "irene_6.su@ebizprise.com", "1234" } };
+	protected static String[][] user1 = { { "prive_admin", "j@8u&SQw1!" }, { "irene_6.su@ebizprise.com", "1234" } };
 
 	// @Test(threadPoolSize = 1, invocationCount = 1, timeOut = 5000000)
 	// public void pace0() {
@@ -117,8 +122,98 @@ public class ForecastControllerNGTest extends RootNGTest {
 		showCurrencyNav(E4T);
 	}
 
-	private ModelPortfolio prepareModel(String targetDate, String modelName,
-			List list, int navRow, int startrow, int endrow) {
+	protected void paceE0S(String csv) {
+		String filename = "/tmp/" + csv + ".csv";
+		List listBenchmark = new ArrayList();
+		Benchmark benz = null;
+		List list = AccessFile.ReadFile_to_List(filename);
+		for (int i = 0; i < list.size(); i++) {
+			String ss = (String) list.get(i);
+			String[] sa = StringUtil.split(ss, ",");
+			if ("null".equals(sa[0])) {
+				if (benz != null) {
+					listBenchmark.add(benz);
+				}
+				logger.info(sa[1]);
+				benz = new Benchmark(sa[1]);
+			} else
+				benz.addPortfolio(new Portfolio(sa[0], sa[1]));
+		}
+		String path1 = "/tmp/bloomberg_PRICE_ALL.xlsx";
+		String path2 = "/tmp/bloomberg_PRICE.xlsx";
+		File f1 = new File(path1);
+		if (f1.exists())
+			f1.delete();
+		File f2 = new File(path2);
+		if (f2.exists())
+			f2.delete();
+
+		ExcelPOIXml ep = new ExcelPOIXml();
+
+		for (int i = 0; i < listBenchmark.size(); i++) {
+			Benchmark benw = (Benchmark) listBenchmark.get(i);
+			showBenchmarkAll(ep, path1, benw);
+			showBenchmark(ep, path2, benw);
+		}
+
+	}
+
+	private void showBenchmarkAll(ExcelPOIXml ep, String path, Benchmark benw) {
+		String sheetName = benw.getName();
+		logger.info("create sheet: " + sheetName);
+		List lines = new ArrayList();
+		List<Portfolio> listPortfolio = benw.getPortfolioList();
+		for (int i = 0; i < listPortfolio.size(); i++) {
+			Portfolio portfolio = listPortfolio.get(i);
+			List ay = new ArrayList();
+			ay.add(portfolio.getLocalDate());
+			ay.add(portfolio.getPrice().toString());
+			lines.add(ay);
+		}
+		ep.outExcel(sheetName, lines, path);
+	}
+
+	private void showBenchmark(ExcelPOIXml ep, String path, Benchmark benw) {
+		String sheetName = benw.getName();
+		logger.info("create sheet: " + sheetName);
+		List lines = new ArrayList();
+		List<Portfolio> listPortfolio = benw.getPortfolioList();
+
+		String from = "1999-05-01";
+		String to = "2019-05-17";
+		List portfolioList = new ArrayList();
+		Date dFrom = DateUtil.str2Date(from, "yyyy-MM-dd");
+		Date dTo = DateUtil.str2Date(to, "yyyy-MM-dd");
+		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
+			String sTest = DateUtil.date2str(dIdx, "yyyyMMdd");
+//			if ("20160101".equals(sTest))
+//				logger.debug("why");
+			Portfolio portfolio = paceDefault.queryPortfolio(listPortfolio, dIdx);
+			if (portfolio != null)
+				portfolioList.add(portfolio);
+		}
+
+		String oDate = "";
+		for (int i = 0; i < portfolioList.size(); i++) {
+			Portfolio portfolio = (Portfolio) portfolioList.get(i);
+			String sDate = portfolio.getLocalDate();
+//			if ("20160101".equals(sDate))
+//				logger.debug("why");
+			Date dDate = DateUtil.str2Date(sDate, "yyyyMMdd");
+			if ((sDate.endsWith("1231") || sDate.endsWith("0101")) && !oDate.equals(sDate)) {
+				List ay = new ArrayList();
+				String dOut = DateUtil.date2str(dDate, "MM/dd/yyyy");
+				ay.add(dOut);
+				ay.add(portfolio.getPrice().toString());
+				lines.add(ay);
+				oDate = sDate;
+			}
+		}
+		ep.outExcel(sheetName, lines, path);
+	}
+
+	private ModelPortfolio prepareModel(String targetDate, String modelName, List list, int navRow, int startrow,
+			int endrow) {
 		List list1 = (List) list.get(navRow);
 		String navS = (String) list1.get(1);
 		BigDecimal nav = new BigDecimal(navS);
@@ -128,8 +223,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return mp;
 	}
 
-	private void prepareModelPortfolio(ModelPortfolio mp, List list,
-			int startrow, int endrow) {
+	private void prepareModelPortfolio(ModelPortfolio mp, List list, int startrow, int endrow) {
 
 		for (int i = startrow; i <= endrow; i++) {
 			List list1 = (List) list.get(i);
@@ -146,8 +240,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 
 			BigDecimal fixunit = verify(mp.getNav(), weight, price, unit);
 
-			Portfolio po = new Portfolio(name, isin, ccy, weight, price,
-					fixunit);
+			Portfolio po = new Portfolio(name, isin, ccy, weight, price, fixunit);
 			mp.addPortfolio(po);
 		}
 
@@ -165,8 +258,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 			logger.error("weight有誤");
 	}
 
-	private BigDecimal verify(BigDecimal nav, BigDecimal weight,
-			BigDecimal price, BigDecimal unit) {
+	private BigDecimal verify(BigDecimal nav, BigDecimal weight, BigDecimal price, BigDecimal unit) {
 		BigDecimal ret1 = nav.multiply(weight);
 		BigDecimal ret2 = ret1.divide(price, 12, BigDecimal.ROUND_HALF_UP);
 		int ret3 = ret2.compareTo(unit);
@@ -307,8 +399,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		pace9_1(username, password, from, to, schemaList, path);
 	}
 
-	public void paceE11T(String username, String password, String from,
-			String to) {
+	public void paceE11T(String username, String password, String from, String to) {
 		// PaceStyle paceStyle = paceStyleFactory.getStyle("TEST1");
 		// username = "jacky.lee@ebizprise.com";
 		// username = "pkpkpk";
@@ -398,8 +489,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 	public void pace6(String email, String usrpwd) {
 		logger.warn("pace6");
 		String filePath = "/trainSalesForecastKaggle20190218_1.csv";
-		PaceStyle paceStyle = paceStyleFactory
-				.getStyle("trainSalesForecastKaggle20190218");
+		PaceStyle paceStyle = paceStyleFactory.getStyle("trainSalesForecastKaggle20190218");
 		email = "jacky.lee@ebizprise.com";
 		usrpwd = "pkpkpk";
 		pace0_1(email, usrpwd, filePath);
@@ -444,8 +534,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 	/**
 	 * 表單自動化測試 -- 全品項預測 Step0_1: 共同部份,每個交易前5步驟都會一樣
 	 */
-	private void pace9_1(String username, String password, String from,
-			String to, List<String> schemaList, String path) {
+	private void pace9_1(String username, String password, String from, String to, List<String> schemaList,
+			String path) {
 		// Class[] argType11 = {};
 		// Object[] args11 = {};
 		// DasCaptchForm dasCaptchForm1 = (DasCaptchForm) paceDefault.pace(
@@ -469,8 +559,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		}
 		String token = token_type + " " + access_token;
 
-		List<ProductForm> productFormList = paceDefault
-				.pace12(token, queryList);
+		List<ProductForm> productFormList = paceDefault.pace12(token, queryList);
 		List lines = new ArrayList();
 
 		ExcelPOIXml ep = new ExcelPOIXml();
@@ -478,29 +567,41 @@ public class ForecastControllerNGTest extends RootNGTest {
 		String sheetName1 = "Sheet 1";
 		String sheetName2 = "Sheet 2";
 		String sheetName3 = "Sheet 3";
+		String sheetName4 = "Sheet 4";
 		ep.outExcelposition("Date", sheetName1, 0, 0, path);
 		ep.outExcelposition("Date", sheetName2, 0, 0, path);
 		for (int i = 0; i < productFormList.size(); i++) {
 			ProductForm productForm = productFormList.get(i);
 			String assetId = productForm.getAssetId();
 
-			List priceList = paceDefault.pace13(token, assetId, from, to);
+//			List priceList = paceDefault.pace13(token, assetId, from, to);
 			String schema = schemaList.get(i);
-			ep.outExcelposition(schema, sheetName1, 0, i + 1, path);
-			ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
+//			ep.outExcelposition(schema, sheetName1, 0, i + 1, path);
+//			ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
 			logger.info(schema);
-			showPrice(priceList, ep, sheetName1, path, i + 1, sheetName2);
+//			showPrice(priceList, ep, sheetName1, path, i + 1, sheetName2);
 
-			List dvdList = paceDefault.pace14(token, assetId, from, to);
+			List listDividends = new ArrayList();
+			List dvdList = paceDefault.pace14(token, assetId, from, to, listDividends);
 			ep.outExcelposition(schema, sheetName3, 0, i + 1, path);
-			// ep.outExcelposition(schema, sheetName2, 0, i * 2 + 1, path);
-			showDvd(dvdList, ep, sheetName3, path, i + 1);
+			ep.outExcelposition(schema, sheetName4, 0, i + 1, path);
+//			showDvd(dvdList, ep, sheetName3, path, i + 1);
+			showDvds(listDividends, ep, sheetName4, path, i + 1);
 		}
 
 	}
 
-	private void pace9_2(String username, String password, String targetDate,
-			ModelPortfolio E9T, String path) {
+	private void showDvds(List listDividends, ExcelPOIXml ep, String sheetName4, String path, int field) {
+		for (int i = 0; i < listDividends.size(); i++) {
+			JSONObject jSONObject = (JSONObject) listDividends.get(i);
+			DvdForm2 dvdForm2 = JSON.parseObject(jSONObject.toJSONString(), DvdForm2.class);
+			logger.info(dvdForm2.getExDate() + " : " + dvdForm2.getValue());
+			ep.outExcelposition(dvdForm2.getValue(), sheetName4, i + 1, field, path);
+			ep.outExcelposition(dvdForm2.getExDate(), sheetName4, i + 1, 0, path);
+		}
+	}
+
+	private void pace9_2(String username, String password, String targetDate, ModelPortfolio E9T, String path) {
 		PriveAuthForm priveAuthForm = paceDefault.pace11(username, password);
 		String access_token = priveAuthForm.getAccess_token();
 		String token_type = priveAuthForm.getToken_type();
@@ -524,8 +625,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 			mp1.put("data-source", "bloomberg");
 			List queryList = new ArrayList();
 			queryList.add(mp1);
-			List<ProductForm> productFormList = paceDefault.pace12(token,
-					queryList);
+			List<ProductForm> productFormList = paceDefault.pace12(token, queryList);
 
 			if (productFormList.size() != 1) {
 				logger.error("沒asset ID");
@@ -534,8 +634,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 				String assetId = productForm.getAssetId();
 				portfolio.setAssetId(assetId);
 
-				List priceList = paceDefault.pace13(token, assetId,
-						"2019-05-14", to);
+				List priceList = paceDefault.pace13(token, assetId, "2019-05-14", to);
 				PriceForm2 priceForm = (PriceForm2) priceList.get(0);
 				BigDecimal closePx = takePrice(priceList, targetDate);
 				// logger.info(priceForm.getLocalDate() + " : " +
@@ -544,8 +643,9 @@ public class ForecastControllerNGTest extends RootNGTest {
 				portfolio.setClosePx(closePx);
 				portfolio.setLocalDate(priceForm.getLocalDate());
 
-				List dvdList = paceDefault.pace14(token, assetId, "2019-05-14",
-						to);
+				List listDividends = new ArrayList();
+				List dvdList = paceDefault.pace14(token, assetId, "2019-05-14", to, listDividends);
+
 				BigDecimal dvd = takeDvd(dvdList, targetDate);
 				portfolio.setDvd(dvd);
 			}
@@ -640,21 +740,16 @@ public class ForecastControllerNGTest extends RootNGTest {
 
 	}
 
-	private void showPrice(List priceList, ExcelPOIXml ep, String sheetName,
-			String path, int field, String sheetName2) {
+	private void showPrice(List priceList, ExcelPOIXml ep, String sheetName, String path, int field,
+			String sheetName2) {
 		for (int i = 0; i < priceList.size(); i++) {
 			PriceForm2 priceForm = (PriceForm2) priceList.get(i);
-			logger.info(priceForm.getLocalDate() + " : "
-					+ priceForm.getClosePx());
-			ep.outExcelposition(priceForm.getClosePx(), sheetName, i + 1,
-					field, path);
-			ep.outExcelposition(priceForm.getLocalDate(), sheetName, i + 1, 0,
-					path);
+			logger.info(priceForm.getLocalDate() + " : " + priceForm.getClosePx());
+			ep.outExcelposition(priceForm.getClosePx(), sheetName, i + 1, field, path);
+			ep.outExcelposition(priceForm.getLocalDate(), sheetName, i + 1, 0, path);
 
-			ep.outExcelposition(priceForm.getClosePx(), sheetName2, i + 1,
-					field * 2 - 1, path);
-			ep.outExcelposition(priceForm.getLocalDate(), sheetName2, i + 1, 0,
-					path);
+			ep.outExcelposition(priceForm.getClosePx(), sheetName2, i + 1, field * 2 - 1, path);
+			ep.outExcelposition(priceForm.getLocalDate(), sheetName2, i + 1, 0, path);
 		}
 	}
 
@@ -673,15 +768,12 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return new BigDecimal(0);
 	}
 
-	private void showDvd(List dvdList, ExcelPOIXml ep, String sheetName3,
-			String path, int field) {
+	private void showDvd(List dvdList, ExcelPOIXml ep, String sheetName3, String path, int field) {
 		for (int i = 0; i < dvdList.size(); i++) {
 			DvdForm2 dvdForm2 = (DvdForm2) dvdList.get(i);
 			logger.info(dvdForm2.getExDate() + " : " + dvdForm2.getValue());
-			ep.outExcelposition(dvdForm2.getValue(), sheetName3, i + 1, field,
-					path);
-			ep.outExcelposition(dvdForm2.getExDate(), sheetName3, i + 1, 0,
-					path);
+			ep.outExcelposition(dvdForm2.getValue(), sheetName3, i + 1, field, path);
+			ep.outExcelposition(dvdForm2.getExDate(), sheetName3, i + 1, 0, path);
 		}
 	}
 
