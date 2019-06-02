@@ -30,8 +30,8 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 			e.printStackTrace();
 		}
 		int n = getWhich();
-		String from = "2019-05-14";
-		String to = "2019-05-28";
+		String from = "2019-05-24";
+		String to = "2019-06-02";
 
 		logger.warn(String.valueOf(n));
 		paceE0T(user1[n][0], user1[n][1], from, to);

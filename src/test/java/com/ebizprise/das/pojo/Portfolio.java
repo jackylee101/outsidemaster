@@ -2,7 +2,11 @@ package com.ebizprise.das.pojo;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Portfolio {
+	private static final Log logger = LogFactory.getLog(Portfolio.class);
 	String name;
 	String isin;
 	String ccy;
@@ -21,7 +25,8 @@ public class Portfolio {
 		super();
 	}
 
-	public Portfolio(String name, String isin, String ccy, BigDecimal weight, BigDecimal price, BigDecimal unit) {
+	public Portfolio(String name, String isin, String ccy, BigDecimal weight,
+			BigDecimal price, BigDecimal unit) {
 		super();
 		this.name = name;
 		this.isin = isin;
@@ -129,6 +134,8 @@ public class Portfolio {
 				BigDecimal totalValue = closePx.add(dvd);
 				nav = totalValue.multiply(unit);
 			}
+			logger.debug("portfolio:" + isin + " price:" + closePx + " dvd:"
+					+ dvd + " unit:" + unit + " nav:" + nav);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

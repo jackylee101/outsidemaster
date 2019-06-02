@@ -1,8 +1,6 @@
 package com.ebizprise.das.web.controller.v1;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.ebizprise.das.scheduled.service.weather.WeatherSync;
+import com.ebizprise.das.form.base.PriveAuthForm;
+import com.ebizprise.das.scheduled.service.weather.B2BService;
 
 /**
  * description:
@@ -24,28 +23,35 @@ import com.ebizprise.das.scheduled.service.weather.WeatherSync;
 
 @Controller
 @RequestMapping("/")
-public class WeatherSyncController {
+public class B2BController {
 	private static final Logger logger = LoggerFactory
-			.getLogger(WeatherSyncController.class);
+			.getLogger(B2BController.class);
 
 	@Autowired
-	private WeatherSync weatherSync;
+	private B2BService b2BService;
 
-	@RequestMapping("/takeWeatherDate2DB")
-	public @ResponseBody Map<String, String> takeWeatherDate2DB(
+	@RequestMapping("/readPortfolioNavLatest")
+	public @ResponseBody List readPortfolioNavLatest(
 			@RequestParam(value = "etlDate", required = false) String etlDate,
 			@RequestParam(value = "syncServer", required = false) String syncServer) {
-		Map<String, String> map = new HashMap<String, String>(16);
-
-		weatherSync.takeWeatherDate2DB(etlDate, syncServer);
-		return map;
+		PriveAuthForm priveAuthForm = b2BService.readPortfolioNavLatest(5);
+		return null;
 	}
 
-	@RequestMapping("/takeWeatherDate2DBtest")
-	public @ResponseBody List takeWeatherDate2DBtest(
+	@RequestMapping("/readPortfolioBackTestingNavLatest")
+	public @ResponseBody List readPortfolioBackTestingNavLatest(
 			@RequestParam(value = "etlDate", required = false) String etlDate,
 			@RequestParam(value = "syncServer", required = false) String syncServer) {
-//		List list = weatherSync.takeWeatherDate2DBtest(etlDate, syncServer);
+		PriveAuthForm priveAuthForm = b2BService
+				.readPortfolioBackTestingNavLatest(10);
+		return null;
+	}
+
+	@RequestMapping("/writePortfolioNavToday")
+	public @ResponseBody List writePortfolioNavToday(
+			@RequestParam(value = "etlDate", required = false) String etlDate,
+			@RequestParam(value = "syncServer", required = false) String syncServer) {
+		PriveAuthForm priveAuthForm = b2BService.writePortfolioNavToday();
 		return null;
 	}
 
