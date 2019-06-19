@@ -104,7 +104,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		XSSFWorkbook workbook = ep.loadExcel(path);
 		String sheetName = "MPs";
 		List list = ep.readExcel(workbook, sheetName);
-		String targetDate = "2019-06-03";
+		String targetDate = "2019-06-17";
 
 		ModelPortfolio E1T = prepareModel(targetDate, "E1T", list, 1, 5, 20);
 		ModelPortfolio E2T = prepareModel(targetDate, "E2T", list, 23, 26, 42);
