@@ -476,10 +476,10 @@
 		<move file="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT.jar" tofile="C:\jsp4\outsidemaster\target/das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
 	</target>
 
-	<target name="33_sftp_upload_jar_DEV_AP" depends="32_move" description="將jar包用SFTP傳到我們的UAT伺服器">
-		<scp todir="root@192.168.128.23:/opt/jar/das-outsidemaster" password="123qweaS" trust="true" verbose="true">
-			<fileset dir="C:\jsp4\outsidemaster\target/">
-				<include name="das-outsidemaster-0.1-SNAPSHOT_${nowstamp}.jar" />
+	<target name="33_sftp_upload_rpt_to_rlee" description="將rpt用SFTP傳到ray伺服器">
+		<scp todir="jacky@192.168.1.120:~/" password="123456" trust="true" verbose="true">
+			<fileset dir="/home/jacky/git/SlyAWS/SlyAWS/WebContent/report/bos_tmp/">
+				<include name="BOSPortfolioInsign.rptdesign" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>
@@ -497,7 +497,7 @@
 		</java>
 	</target>
 
-	<target name="35_ssh_mkdir" depends="33_sftp_upload_jar_DEV_AP" description="執行遠端主機上的ssh將mkdir">
+	<target name="35_ssh_mkdir" depends="" description="執行遠端主機上的ssh將mkdir">
 		<sshexec host="192.168.128.23" username="root" password="123qweaS" command="mkdir -p /opt/jar/das-outsidemaster/${lastmonthstamp}" trust="true" />
 	</target>
 

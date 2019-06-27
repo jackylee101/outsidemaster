@@ -28,9 +28,9 @@ public class PaceDefault14T extends PaceDefault {
 	 */
 	@Test
 	public void PaceDefault14T() {
-		QueryForm queryForm = pace14(FPUtil.custId, work);
-		FPUtil.prjItmId = queryForm.getQueryString();
-		Assert.assertTrue(queryForm.getSuccess());
+//		QueryForm queryForm = pace14(FPUtil.custId, work);
+//		FPUtil.prjItmId = queryForm.getQueryString();
+//		Assert.assertTrue(queryForm.getSuccess());
 	}
 
 }

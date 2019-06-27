@@ -5,7 +5,7 @@ import java.util.List;
 import com.ebizprise.das.pojo.Account;
 import com.ebizprise.das.utils.CommonUtils;
 
-public class FPUtil extends PaceBase {
+public class FPUtil {
 
 	static public String cookieId;
 	static public String captchaCode;
