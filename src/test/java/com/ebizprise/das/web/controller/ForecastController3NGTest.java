@@ -1,9 +1,12 @@
 package com.ebizprise.das.web.controller;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.ebizprise.das.utils.DateUtil;
 import com.ebizprise.das.web.controller.minor.FPUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +17,24 @@ import lombok.extern.slf4j.Slf4j;
  * @author jacky.lee
  *
  */
-//@ActiveProfiles("dev")
+// @ActiveProfiles("dev")
 @Slf4j
 public class ForecastController3NGTest extends ForecastControllerNGTest {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Test
-	public void pace_Price_excel() {
+	public void pace_daywork() {
+		Date today = new Date();
+		Date yesterday = DateUtil.add(today, -1);
+		String targetDate = DateUtil.date2str(yesterday, "yyyy-MM-dd");
+
+		// targetDate = "2019-06-25";
+		logger.info("target Date:" + targetDate);
+		pace_Price_excel(targetDate);
+		pace_NAV_everyday(targetDate);
+	}
+
+	public void pace_Price_excel(String targetDate) {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 		// FPUtil.realHost = "http://localhost:8075";
 		// FPUtil.realHost = "http://uatrds.rollingdemand.com.cn";
@@ -30,22 +44,21 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 			e.printStackTrace();
 		}
 		int n = getWhich();
-		String from = "2019-06-03";
-		String to = "2019-06-18";
+		String from = "2019-06-12";
+		// String to = "2019-06-26";
 
 		logger.warn(String.valueOf(n));
-		paceE0T(user1[n][0], user1[n][1], from, to);
-		paceE1T(user1[n][0], user1[n][1], from, to);
-		paceE2T(user1[n][0], user1[n][1], from, to);
-		paceE3T(user1[n][0], user1[n][1], from, to);
-		paceE4T(user1[n][0], user1[n][1], from, to);
+		paceE0T(user1[n][0], user1[n][1], from, targetDate);
+		paceE1T(user1[n][0], user1[n][1], from, targetDate);
+		paceE2T(user1[n][0], user1[n][1], from, targetDate);
+		paceE3T(user1[n][0], user1[n][1], from, targetDate);
+		paceE4T(user1[n][0], user1[n][1], from, targetDate);
 	}
 
 	@Test
-	public void pace_NAV_everyday() {
+	public void pace_NAV_everyday(String targetDate) {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
-
-		paceE0A(user1[0][0], user1[0][1]);
+		paceE0A(user1[0][0], user1[0][1], targetDate);
 	}
 
 	@Test

@@ -129,7 +129,7 @@ public class PaceDefault extends PaceBase {
 		List priceList = new ArrayList();
 		Date dFrom = DateUtil.str2Date(from, "yyyy-MM-dd");
 		Date dTo = DateUtil.str2Date(to, "yyyy-MM-dd");
-		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
+		for (Date dIdx = dFrom; DateUtil.LessEqual(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
 			PriceForm2 priceForm2 = queryPrice(list, dIdx);
 			if (priceForm2 != null)
 				priceList.add(priceForm2);
@@ -153,7 +153,7 @@ public class PaceDefault extends PaceBase {
 		List dvdList = new ArrayList();
 		Date dFrom = DateUtil.str2Date(from, "yyyy-MM-dd");
 		Date dTo = DateUtil.str2Date(to, "yyyy-MM-dd");
-		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
+		for (Date dIdx = dFrom; DateUtil.LessEqual(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
 			DvdForm2 dvdForm2 = queryDvd(list, dIdx);
 			dvdList.add(dvdForm2);
 		}
@@ -168,7 +168,7 @@ public class PaceDefault extends PaceBase {
 			DvdForm2 dvdForm2 = JSON.parseObject(dvd.toJSONString(), DvdForm2.class);
 			String localDate = dvdForm2.getExDate();
 			Date dlocalDate = DateUtil.str2Date(localDate, "yyyyMMdd");
-			if (DateUtil.Less(dlocalDate, dIdx))
+			if (DateUtil.LessEqual(dlocalDate, dIdx))
 				keep = new DvdForm2(dvdForm2);
 			if (DateUtil.Equ(dlocalDate, dIdx))
 				return dvdForm2;
@@ -185,7 +185,7 @@ public class PaceDefault extends PaceBase {
 			PriceForm2 priceForm2 = JSON.parseObject(price.toJSONString(), PriceForm2.class);
 			String localDate = priceForm2.getLocalDate();
 			Date dlocalDate = DateUtil.str2Date(localDate, "yyyyMMdd");
-			if (DateUtil.Less(dlocalDate, dIdx))
+			if (DateUtil.LessEqual(dlocalDate, dIdx))
 				keep = new PriceForm2(priceForm2);
 			if (DateUtil.Equ(dlocalDate, dIdx))
 				return priceForm2;
@@ -211,7 +211,7 @@ public class PaceDefault extends PaceBase {
 //					logger.error("why");
 //			}
 			Date dlocalDate = DateUtil.str2Date(localDate, "yyyyMMdd");
-			if (DateUtil.Less(dlocalDate, dIdx))
+			if (DateUtil.LessEqual(dlocalDate, dIdx))
 				keep = new Portfolio(portfolio);
 			if (DateUtil.Equ(dlocalDate, dIdx))
 				return portfolio;

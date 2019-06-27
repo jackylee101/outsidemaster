@@ -98,13 +98,13 @@ public class ForecastControllerNGTest extends RootNGTest {
 	// pace1(user1[n][0], user1[n][1]);
 	// }
 
-	public void paceE0A(String username, String password) {
+	public void paceE0A(String username, String password,String targetDate) {
 		String path = "/tmp/Fubon Nano#1 ETF NAV Calculator (for 20190529 reblance) Jacky.xlsx";
 		ExcelPOIXml ep = new ExcelPOIXml();
 		XSSFWorkbook workbook = ep.loadExcel(path);
 		String sheetName = "MPs";
 		List list = ep.readExcel(workbook, sheetName);
-		String targetDate = "2019-06-17";
+//		String targetDate = "2019-06-25";
 
 		ModelPortfolio E1T = prepareModel(targetDate, "E1T", list, 1, 5, 20);
 		ModelPortfolio E2T = prepareModel(targetDate, "E2T", list, 23, 26, 42);
@@ -184,7 +184,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		List portfolioList = new ArrayList();
 		Date dFrom = DateUtil.str2Date(from, "yyyy-MM-dd");
 		Date dTo = DateUtil.str2Date(to, "yyyy-MM-dd");
-		for (Date dIdx = dFrom; DateUtil.Less(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
+		for (Date dIdx = dFrom; DateUtil.LessEqual(dIdx, dTo); dIdx = DateUtil.add(dIdx, 1)) {
 			String sTest = DateUtil.date2str(dIdx, "yyyyMMdd");
 //			if ("20160101".equals(sTest))
 //				logger.debug("why");

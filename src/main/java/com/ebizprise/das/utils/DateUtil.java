@@ -182,8 +182,8 @@ public class DateUtil {
 		return m.matches();
 	}
 
-	public static boolean Less(Date dIdx, Date dTo) {
-		return dIdx.getTime() < dTo.getTime();
+	public static boolean LessEqual(Date dIdx, Date dTo) {
+		return dIdx.getTime() <= dTo.getTime();
 	}
 
 	public static boolean Equ(Date dIdx, Date dTo) {
