@@ -34,9 +34,7 @@ import com.ebizprise.das.web.controller.minor.FPUtil;
 import com.ebizprise.das.web.controller.minor.PaceDefault;
 import com.ebizprise.das.web.controller.minor.PaceStyle;
 import com.ebizprise.das.web.controller.suite.forecast.PaceStyleFactory;
-import com.prive.das.utils.ExcelPOIXml;
-
-import bsh.StringUtil;
+import com.prive.utils.ExcelPOIXml;
 
 /**
  * 單品項預測 大單元測試
@@ -98,8 +96,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 	// pace1(user1[n][0], user1[n][1]);
 	// }
 
-	public void paceE0A(String username, String password,String targetDate) {
-		String path = "/tmp/Fubon Nano#1 ETF NAV Calculator (for 20190529 reblance) Jacky.xlsx";
+	public String[] paceE0A(String username, String password, String targetDate) {
+		String path = "/home/jacky/Documents/Fubon Nano#1 ETF NAV Calculator (for 20190529 reblance) Jacky.xlsx";
 		ExcelPOIXml ep = new ExcelPOIXml();
 		XSSFWorkbook workbook = ep.loadExcel(path);
 		String sheetName = "MPs";
@@ -116,10 +114,14 @@ public class ForecastControllerNGTest extends RootNGTest {
 		pace9_2(username, password, targetDate, E3T, path);
 		pace9_2(username, password, targetDate, E4T, path);
 
-		showCurrencyNav(E1T);
-		showCurrencyNav(E2T);
-		showCurrencyNav(E3T);
-		showCurrencyNav(E4T);
+		String nav1 = showCurrencyNav(E1T);
+		String nav2 = showCurrencyNav(E2T);
+		String nav3 = showCurrencyNav(E3T);
+		String nav4 = showCurrencyNav(E4T);
+
+		String itargetDate = StringUtils.replace(targetDate, "-", "/");
+		String[] sa = { itargetDate, nav1, nav2, nav3, nav4 };
+		return sa;
 	}
 
 	protected void paceE0S(String csv) {
@@ -129,7 +131,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		List list = AccessFile.ReadFile_to_List(filename);
 		for (int i = 0; i < list.size(); i++) {
 			String ss = (String) list.get(i);
-			String[] sa = StringUtil.split(ss, ",");
+			String[] sa = StringUtils.split(ss, ",");
 			if ("null".equals(sa[0])) {
 				if (benz != null) {
 					listBenchmark.add(benz);
@@ -298,7 +300,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00B2QWDY88");
 		schemaList.add("IE0032077012");
 		schemaList.add("LU1407889887");
-		
+
 		schemaList.add("IE00BYXYYJ35");
 		schemaList.add("IE00B7N3YW49");
 
@@ -327,9 +329,9 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("LU1452600270");
 		schemaList.add("IE00BCRY6227");
 		schemaList.add("IE00BCRY5Y77");
-		
+
 		schemaList.add("IE00B7N3YW49");
-		
+
 		pace9_1(username, password, from, to, schemaList, path);
 		// pace0_3(paceStyle);
 	}
@@ -354,7 +356,7 @@ public class ForecastControllerNGTest extends RootNGTest {
 		schemaList.add("IE00BCRY6227");
 		schemaList.add("IE00BCRY5Y77");
 		schemaList.add("IE00B7N3YW49");
-		
+
 		pace9_1(username, password, from, to, schemaList, path);
 	}
 
@@ -676,11 +678,11 @@ public class ForecastControllerNGTest extends RootNGTest {
 		return new BigDecimal(0);
 	}
 
-	private void showCurrencyNav(ModelPortfolio E9T) {
+	private String showCurrencyNav(ModelPortfolio E9T) {
 		BigDecimal nav = E9T.calcNav();
 		BigDecimal b = nav.setScale(6, BigDecimal.ROUND_HALF_UP);
 		logger.warn(E9T.getModelName() + "  " + E9T.getTargetDate() + "  " + b);
-
+		return String.valueOf(b);
 	}
 
 	/**

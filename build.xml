@@ -477,9 +477,10 @@
 	</target>
 
 	<target name="33_sftp_upload_rpt_to_rlee" description="將rpt用SFTP傳到ray伺服器">
-		<scp todir="jacky@192.168.1.120:~/" password="123456" trust="true" verbose="true">
+		<scp todir="jacky@192.168.1.247:~/" password="123456" trust="true" verbose="true">
 			<fileset dir="/home/jacky/git/SlyAWS/SlyAWS/WebContent/report/bos_tmp/">
 				<include name="BOSPortfolioInsign.rptdesign" />
+				<include name="twin_s.png" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>

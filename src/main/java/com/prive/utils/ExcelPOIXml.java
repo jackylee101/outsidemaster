@@ -1,4 +1,4 @@
-package com.prive.das.utils;
+package com.prive.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
