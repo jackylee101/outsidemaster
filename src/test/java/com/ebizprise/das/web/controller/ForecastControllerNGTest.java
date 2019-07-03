@@ -119,7 +119,8 @@ public class ForecastControllerNGTest extends RootNGTest {
 		String nav3 = showCurrencyNav(E3T);
 		String nav4 = showCurrencyNav(E4T);
 
-		String itargetDate = StringUtils.replace(targetDate, "-", "/");
+		Date dt = DateUtil.str2Date(targetDate, "yyyy-MM-dd");
+		String itargetDate = DateUtil.date2str(dt, "M/d/yyyy");
 		String[] sa = { itargetDate, nav1, nav2, nav3, nav4 };
 		return sa;
 	}

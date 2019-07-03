@@ -26,12 +26,20 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.Sheets.Spreadsheets.Values.Append;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.AddSheetRequest;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetResponse;
+import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
 import com.google.api.services.sheets.v4.model.DimensionRange;
+import com.google.api.services.sheets.v4.model.ExtendedValue;
+import com.google.api.services.sheets.v4.model.GridCoordinate;
 import com.google.api.services.sheets.v4.model.InsertDimensionRequest;
 import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.RowData;
+import com.google.api.services.sheets.v4.model.SheetProperties;
+import com.google.api.services.sheets.v4.model.UpdateCellsRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 public class GoogleSheetUtil {
@@ -101,9 +109,45 @@ public class GoogleSheetUtil {
 //			VRange.setRange(range);
 
 			Append upd = service.spreadsheets().values().append(spreadsheetId, range, VRange);
-			upd.setValueInputOption("USER_ENTERED");
+			upd.setValueInputOption("RAW");// "USER_ENTERED");
 			AppendValuesResponse responses = upd.execute();
 			logger.info(responses.getUpdates().getUpdatedRange());
+		} catch (GeneralSecurityException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+	public static void AppendFormat(String spreadsheetId) {
+		try {
+			NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+			Sheets service = new Sheets.Builder(HTTP_TRANSPORT, GoogleSheetUtil.JSON_FACTORY,
+					GoogleSheetUtil.getCredentials(HTTP_TRANSPORT)).setApplicationName(GoogleSheetUtil.APPLICATION_NAME)
+							.build();
+
+			List<Request> requests = new ArrayList<>();
+
+			List<CellData> values = new ArrayList<>();
+
+			values.add(new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("Hello World!")));
+
+			requests.add(new Request()
+					.setAddSheet(new AddSheetRequest().setProperties(new SheetProperties().setTitle("scstc"))));
+			requests.add(new Request().setUpdateCells(new UpdateCellsRequest()
+					.setStart(new GridCoordinate().setSheetId(753673215).setRowIndex(0).setColumnIndex(0))
+					.setRows(Arrays.asList(new RowData().setValues(values)))
+					.setFields("userEnteredValue,userEnteredFormat.backgroundColor")));
+
+			BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+			BatchUpdateSpreadsheetResponse response = service.spreadsheets().batchUpdate(spreadsheetId, body).execute();
+
+//			service.spreadsheets().batchUpdate(spreadsheetId, content).execute();
+//			upd.setValueInputOption("RAW");//"USER_ENTERED");
+//			AppendValuesResponse responses = upd.execute();
+//			logger.info(responses.getUpdates().getUpdatedRange());
 		} catch (GeneralSecurityException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {

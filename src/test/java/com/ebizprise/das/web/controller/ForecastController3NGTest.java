@@ -77,7 +77,7 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 
 	private void appendTargetDateData(String[] sa) {
 		try {
-			NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+//			NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
 			String spreadsheetId = "1vAvvm3LCy11SseI-En5q-2Rh5OddR00_lwMrBVhVKEw";
 			String sheetName = "Nutmeg-MP(USD)";
@@ -86,9 +86,7 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 			String[][] ssValue = new String[][] { sa };
 
 			GoogleSheetUtil.AppendRow(spreadsheetId, sheetName, startCell, ssValue);
-		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -173,6 +171,9 @@ public class ForecastController3NGTest extends ForecastControllerNGTest {
 	public void pace_NAV_everyday(String targetDate) {
 		FPUtil.realHost = "https://tw-api-micro.privemanagers.com";
 		String[] sa = paceE0A(user1[0][0], user1[0][1], targetDate);
+
+		String spreadsheetId = "1xGj6-ly-PwVoD1AlZ3-dWcM_PzF2kUjQu7nJoBPc6LY";
+		GoogleSheetUtil.AppendFormat(spreadsheetId);
 
 		String itargetDate = sa[0];
 		List<List<Object>> values = readSheet();
