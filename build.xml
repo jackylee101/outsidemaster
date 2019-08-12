@@ -480,11 +480,30 @@
 		<scp todir="jacky@192.168.1.247:~/" password="123456" trust="true" verbose="true">
 			<fileset dir="/home/jacky/git/SlyAWS/SlyAWS/WebContent/report/bos_tmp/">
 				<include name="BOSPortfolioInsign.rptdesign" />
-				<include name="twin_s.png" />
+				<!--<include name="**/*.png" />
+				<include name="**/foo.*"/> -->
+			</fileset>
+		</scp>
+	</target>
+
+	<target name="34_sftp_upload_rpt_to_rlee" description="將rpt用SFTP傳到ray伺服器">
+		<scp todir="jacky@192.168.1.120:~/" password="123456" trust="true" verbose="true">
+			<fileset dir="/home/jacky/git/SlyAWS/SlyAWS/WebContent/report/bos_tmp/">
+				<include name="BOSPortfolioInsign.rptdesign" />
 				<!--<include name="**/foo.*"/> -->
 			</fileset>
 		</scp>
 	</target>
+
+	<target name="35_copy_rpt_to_tmp" depends="" description="拷貝rpt的內容去tmp">
+		<copy todir="/tmp/rpt_design_file" verbose="true" overwrite="true">
+			<fileset dir="/home/jacky/git/SlyAWS/SlyAWS/WebContent/report/bos_tmp/">
+				<include name="BOSPortfolioInsign.rptdesign" />
+				<exclude name=".svn" />
+			</fileset>
+		</copy>
+	</target>
+
 
 	<target name="34_ssh_kill_das_outsidemaster" depends="">
 		<java classname="com.ebizprise.das.utils.SSHUtils" fork="true">
